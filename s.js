@@ -81,7 +81,7 @@ wsServer.on('request', function(request) {
         if (message.error) {
             job.rejecter(message.error)
         } else {
-            job.resolver(message.result)
+            job.resolver(message.value)
         }
     })
 
@@ -110,21 +110,22 @@ wsServer.on('request', function(request) {
     //     return os.hostname();
     // }
 
-    var getOS = `result = os.hostname();`
+    var throws = `throw new Error('hi') `;
 
-    var lookup = `result = dns.lookupAsync('yahoo.com'); `
+    var getOS = `os.hostname();`
+
+    var lookup = `dns.lookupAsync('yahoo.com'); `
 
     var ifconfig = `var spawn = child_process.spawn;
     var spawn = spawn('ifconfig');
-    var result = '';
     var datums;
     spawn.stdout.on('data', function (data) { datums += data; } );
     
-    result = new Promise(function (resolver) {
+    new Promise(function (resolver) {
         spawn.on('close', function() { resolver(datums); } );
     });
     `
     setInterval(function () {
-        runRemotely(lookup).then(function (x) { console.log(x)});
+        runRemotely(getOS).then(function (x) { console.log(x)});
     }, 1000);
 });

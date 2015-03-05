@@ -37,37 +37,40 @@ client.on('connect', function(connection) {
 
             var id = cmd.id;
             JOBS[id] = {};
-            JOBS[id].id = cmd.id;
+            var job = JOBS[id];
+            job.id = cmd.id;
 
             try {
-                var fun = vm.runInContext(cmd.eval, sandbox);
-                JOBS[id].result = sandbox.result;
+                job.promise = vm.runInContext(cmd.eval, sandbox);
+                
+                if (!Promise.is(job.promise)) {
+                    job.promise = Promise.resolve(job.promise);
+                }
             } catch (error) {
-                console.error(error);
-                JOBS[id].error = error;
-                sendResponse(JOBS[id]);
+                job.promise = Promise.reject(error);
             }
 
-            if (!Promise.is(JOBS[id].result)) {
-                JOBS[id].result = Promise.resolve(JOBS[id].result);
-            }
+            debugger;
 
-            JOBS[id].result.then(function (res) {
-                JOBS[id].result = res;
-                sendResponse(JOBS[id]);
-            }, function (res) {
-                JOBS[id].result = res;
-                sendResponse(JOBS[id]);
-            });
-            
+            job.promise.then(function (value) {
+                sendResponse(job, value);
+            }, function (error) {
+                sendResponse(job, null, error);
+            })
         }
     });
 
-    function sendResponse(x) {
+    function sendResponse(job, value, error) {
         if (connection.connected) {
-            console.log('Sending response ' + JSON.stringify(x));
-           connection.sendUTF(JSON.stringify(x));
-           delete JOBS.id; 
+
+            var send = {};
+            send.id = job.id;
+            send.value = value;
+            send.error = error;
+
+            console.log('Sending response ' + JSON.stringify(send));
+            connection.sendUTF(JSON.stringify(send));
+            
         }
     }
 });
