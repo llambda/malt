@@ -41,9 +41,10 @@ var minions = [];
  
 setInterval(function () {
 
-    minions.map(runRemotely).map(function (x) {
-        return x(commands.getOS);
-    })
+    Promise.all(minions.map(function (minion) {
+        return runRemotely(minion, commands.getOS);
+    })).then(console.log);
+       
 
     // runRemotely(getOS).then(function (x) { console.log(x)});
 }, 1000);
@@ -52,27 +53,25 @@ setInterval(function () {
  * Takes as minion.
  * Returns a function that takes a command string that will run on that minion.
  */
-function runRemotely(connection) {
-    return function(command) {
-        if (!typeof command === 'string') throw new TypeError();
-        
-        JOB++;
+function runRemotely(connection, command) {
+    if (!typeof command === 'string') throw new TypeError();
+    
+    JOB++;
 
-        var job = {};
-        job.id = JOB;
-        job.eval = command;
+    var job = {};
+    job.id = JOB;
+    job.eval = command;
 
-        connection.sendUTF(JSON.stringify(job));
+    connection.sendUTF(JSON.stringify(job));
 
-        job.connection = connection;
-        job.promise = new Promise(function (resolver, rejecter) {
-            job.resolver = resolver;
-            job.rejecter = rejecter;
-        });
+    job.connection = connection;
+    job.promise = new Promise(function (resolver, rejecter) {
+        job.resolver = resolver;
+        job.rejecter = rejecter;
+    });
 
-        JOBS[job.id] = job;
-        return job.promise;
-    }
+    JOBS[job.id] = job;
+    return job.promise;
 }
 
 wsServer.on('request', function(request) {
