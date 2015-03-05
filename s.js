@@ -122,7 +122,7 @@ wsServer.on('request', function(request) {
     
     result = new Promise(function (resolver) {
         spawn.on('close', function() { resolver(datums); } );
-    }); 3asdf
+    });
     `
     setInterval(function () {
         runRemotely(ifconfig).then(function () { console.log('promises worked!' )});
