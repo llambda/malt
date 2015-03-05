@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+'use strict';
 var Promise = require('bluebird');
 var WebSocketServer = require('websocket').server;
 
@@ -16,7 +17,7 @@ server.listen(7770, function() {
 // https://www.npmjs.com/package/websocket
 
 
-wsServer = new WebSocketServer({
+var wsServer = new WebSocketServer({
     httpServer: server,
     // You should not use autoAcceptConnections for production
     // applications, as it defeats all standard cross-origin protection
@@ -130,5 +131,5 @@ wsServer.on('request', function(request) {
     `
     setInterval(function () {
         runRemotely(getOS).then(function (x) { console.log(x)});
-    }, 1);
+    }, 1000);
 });

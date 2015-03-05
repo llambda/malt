@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+'use strict';
 var Promise = require('bluebird');
 var WebSocketClient = require('websocket').client;
 var vm = require('vm');
@@ -19,58 +20,76 @@ client.on('connectFailed', function(error) {
     console.log('Connect Error: ' + error.toString());
 });
 
-var JOBS = [];
+var QUEUED_JOBS = [];
 
 client.on('connect', function(connection) {
+
+    function sendResponse(jobId, value, error) {
+        if (connection.connected) {
+            var send = {};
+            send.id = jobId;
+            send.value = value;
+            send.error = error;
+
+            console.log('Sending response ' + JSON.stringify(send));
+            connection.sendUTF(JSON.stringify(send));            
+        } else {
+            QUEUED_JOBS.push({
+             jobId: jobId,
+             value: value,
+             error: error 
+         })
+        }
+    }
+
+    QUEUED_JOBS.forEach(function (job) {
+        sendResponse(job.jobId, job,value, job.error);
+    });
+
     console.log('WebSocket Client Connected');
     connection.on('error', function(error) {
         console.log("Connection Error: " + error.toString());
     });
     connection.on('close', function() {
-        console.log('echo-protocol Connection Closed');
+        console.log('Connection Closed');
+        connect();
     });
     connection.on('message', function(message) {
         if (message.type === 'utf8') {
             console.log("Received: '" + message.utf8Data + "'");
 
             var cmd = JSON.parse(message.utf8Data);
-
             var id = cmd.id;
-            JOBS[id] = {};
-            var job = JOBS[id];
-            job.id = cmd.id;
+            var promise;
+            // JOBS[id] = {};
+            // var job = JOBS[id];
+            // job.id = cmd.id;
 
             try {
-                job.promise = vm.runInContext(cmd.eval, sandbox);
+                promise = vm.runInContext(cmd.eval, sandbox);
                 
-                if (!Promise.is(job.promise)) {
-                    job.promise = Promise.resolve(job.promise);
+                if (!Promise.is(promise)) {
+                    promise = Promise.resolve(promise);
                 }
             } catch (error) {
-                job.promise = Promise.reject(error);
+                promise = Promise.reject(promise);
             }
 
-            job.promise.then(function (value) {
-                sendResponse(job, value);
+            promise.then(function (value) {
+                sendResponse(id, value);
             }, function (error) {
-                sendResponse(job, null, error);
+                sendResponse(id, null, error);
             })
         }
     });
-
-    function sendResponse(job, value, error) {
-        if (connection.connected) {
-
-            var send = {};
-            send.id = job.id;
-            send.value = value;
-            send.error = error;
-
-            console.log('Sending response ' + JSON.stringify(send));
-            connection.sendUTF(JSON.stringify(send));
-            
-        }
-    }
 });
 
-client.connect('ws://localhost:7770/', 'minion');
+function connect() {
+    client.connect('ws://localhost:7770/', 'minion');
+}
+
+client.on('connectFailed', function () {
+    setTimeout(connect, 3000);
+});
+
+connect();
