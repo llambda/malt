@@ -9,11 +9,11 @@ var dns = Promise.promisifyAll(require('dns'));
 var client = new WebSocketClient();
 
 var sandbox = {};
+sandbox.require = require;
 sandbox.os = os;
 sandbox.dns = dns;
 sandbox.Promise = Promise;
 sandbox.child_process = Promise.promisifyAll(require('child_process'));
-
 vm.createContext(sandbox);
 
 client.on('connectFailed', function(error) {
@@ -66,6 +66,7 @@ client.on('connect', function(connection) {
             // job.id = cmd.id;
 
             try {
+                
                 promise = vm.runInContext(cmd.eval, sandbox);
                 
                 if (!Promise.is(promise)) {

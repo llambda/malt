@@ -5,6 +5,8 @@ var WebSocketServer = require('websocket').server;
 
 var http = require('http');
 
+var commands = require('./commands');
+
 var server = http.createServer(function(request, response) {
     console.log((new Date()) + ' Received request for ' + request.url);
     response.writeHead(404);
@@ -35,22 +37,25 @@ function originIsAllowed(origin) {
 var JOB = 0;
 var JOBS = [];
 
-var connections = [];
+var minions = [];
+ 
+setInterval(function () {
 
-wsServer.on('request', function(request) {
+    minions.map(runRemotely).map(function (x) {
+        return x(commands.getOS);
+    })
 
-    // console.log(request.httpRequest);
+    // runRemotely(getOS).then(function (x) { console.log(x)});
+}, 1000);
 
-    if (!originIsAllowed(request.origin)) {
-      // Make sure we only accept requests from an allowed origin
-      request.reject();
-      console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
-      return;
-    }
-
-    var connection = request.accept('minion', request.origin);
-
-    function runRemotely(command /* string*/) {
+/**
+ * Takes as minion.
+ * Returns a function that takes a command string that will run on that minion.
+ */
+function runRemotely(connection) {
+    return function(command) {
+        if (!typeof command === 'string') throw new TypeError();
+        
         JOB++;
 
         var job = {};
@@ -68,6 +73,46 @@ wsServer.on('request', function(request) {
         JOBS[job.id] = job;
         return job.promise;
     }
+}
+
+wsServer.on('request', function(request) {
+
+    // console.log(request.httpRequest);
+
+    if (!originIsAllowed(request.origin)) {
+      // Make sure we only accept requests from an allowed origin
+      request.reject();
+      console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
+      return;
+    }
+
+    var connection = request.accept('minion', request.origin);
+
+    minions.push(connection);
+    // connection.remoteAddresses.forEach(function (address) {
+    //     minions.push(address, connection);
+    // })
+
+    debugger;
+
+    // function runRemotely(command /* string*/) {
+    //     JOB++;
+
+    //     var job = {};
+    //     job.id = JOB;
+    //     job.eval = command;
+
+    //     connection.sendUTF(JSON.stringify(job));
+
+    //     job.connection = connection;
+    //     job.promise = new Promise(function (resolver, rejecter) {
+    //         job.resolver = resolver;
+    //         job.rejecter = rejecter;
+    //     });
+
+    //     JOBS[job.id] = job;
+    //     return job.promise;
+    // }
 
     connection.on('message', function (message) {
         console.log((new Date()) + ' malt Connection accepted.');
@@ -114,22 +159,4 @@ wsServer.on('request', function(request) {
     //     return os.hostname();
     // }
 
-    var throws = `throw new Error('hi') `;
-
-    var getOS = `os.hostname();`
-
-    var lookup = `dns.lookupAsync('yahoo.com'); `
-
-    var ifconfig = `var spawn = child_process.spawn;
-    var spawn = spawn('ifconfig');
-    var datums;
-    spawn.stdout.on('data', function (data) { datums += data; } );
-    
-    new Promise(function (resolver) {
-        spawn.on('close', function() { resolver(datums); } );
-    });
-    `
-    setInterval(function () {
-        runRemotely(getOS).then(function (x) { console.log(x)});
-    }, 1000);
 });
