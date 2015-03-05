@@ -125,6 +125,6 @@ wsServer.on('request', function(request) {
     });
     `
     setInterval(function () {
-        runRemotely(ifconfig).then(function () { console.log('promises worked!' )});
+        runRemotely(lookup).then(function (x) { console.log(x)});
     }, 1000);
 });

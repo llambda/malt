@@ -52,7 +52,10 @@ client.on('connect', function(connection) {
                 JOBS[id].result = Promise.resolve(JOBS[id].result);
             }
 
-            JOBS[id].result.finally(function (res) {
+            JOBS[id].result.then(function (res) {
+                JOBS[id].result = res;
+                sendResponse(JOBS[id]);
+            }, function (res) {
                 JOBS[id].result = res;
                 sendResponse(JOBS[id]);
             });
@@ -62,6 +65,7 @@ client.on('connect', function(connection) {
 
     function sendResponse(x) {
         if (connection.connected) {
+            console.log('Sending response ' + JSON.stringify(x));
            connection.sendUTF(JSON.stringify(x));
            delete JOBS.id; 
         }
