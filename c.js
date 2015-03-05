@@ -50,8 +50,6 @@ client.on('connect', function(connection) {
                 job.promise = Promise.reject(error);
             }
 
-            debugger;
-
             job.promise.then(function (value) {
                 sendResponse(job, value);
             }, function (error) {
@@ -75,4 +73,4 @@ client.on('connect', function(connection) {
     }
 });
 
-client.connect('ws://localhost:7770/', 'malt');
+client.connect('ws://localhost:7770/', 'minion');

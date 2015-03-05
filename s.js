@@ -13,6 +13,9 @@ server.listen(7770, function() {
     console.log((new Date()) + ' Server is listening on port 7770');
 });
 
+// https://www.npmjs.com/package/websocket
+
+
 wsServer = new WebSocketServer({
     httpServer: server,
     // You should not use autoAcceptConnections for production
@@ -35,7 +38,7 @@ var connections = [];
 
 wsServer.on('request', function(request) {
 
-    console.log(request);
+    // console.log(request.httpRequest);
 
     if (!originIsAllowed(request.origin)) {
       // Make sure we only accept requests from an allowed origin
@@ -44,7 +47,7 @@ wsServer.on('request', function(request) {
       return;
     }
 
-    var connection = request.accept('malt', request.origin);
+    var connection = request.accept('minion', request.origin);
 
     function runRemotely(command /* string*/) {
         JOB++;
@@ -127,5 +130,5 @@ wsServer.on('request', function(request) {
     `
     setInterval(function () {
         runRemotely(getOS).then(function (x) { console.log(x)});
-    }, 1000);
+    }, 1);
 });
