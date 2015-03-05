@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 'use strict';
-var Promise = require('bluebird');
-var WebSocketServer = require('websocket').server;
+const Promise = require('bluebird');
+const WebSocketServer = require('websocket').server;
+const http = require('http');
 
-var http = require('http');
+const commands = require('./commands');
 
-var commands = require('./commands');
-
-var server = http.createServer(function(request, response) {
+const server = http.createServer(function(request, response) {
     console.log((new Date()) + ' Received request for ' + request.url);
     response.writeHead(404);
     response.end();
@@ -19,7 +18,7 @@ server.listen(7770, function() {
 // https://www.npmjs.com/package/websocket
 
 
-var wsServer = new WebSocketServer({
+const wsServer = new WebSocketServer({
     httpServer: server,
     // You should not use autoAcceptConnections for production
     // applications, as it defeats all standard cross-origin protection
@@ -34,10 +33,16 @@ function originIsAllowed(origin) {
   return true;
 }
 
-var JOB = 0;
-var JOBS = [];
+let JOB = 0;
+const JOBS = [];
 
-var minions = [];
+const minions = [];
+
+setInterval(function () {
+    console.log('JOB# ' + JOB);
+    if (minions.length > 0)
+        console.log('# of connected minions ' + minions.length);
+}, 5000);
  
 setInterval(function () {
 
@@ -58,7 +63,7 @@ function runRemotely(connection, command) {
     
     JOB++;
 
-    var job = {};
+    let job = {};
     job.id = JOB;
     job.eval = command;
 
@@ -85,7 +90,7 @@ wsServer.on('request', function(request) {
       return;
     }
 
-    var connection = request.accept('minion', request.origin);
+    let connection = request.accept('minion', request.origin);
 
     minions.push(connection);
     // connection.remoteAddresses.forEach(function (address) {
@@ -97,7 +102,7 @@ wsServer.on('request', function(request) {
     // function runRemotely(command /* string*/) {
     //     JOB++;
 
-    //     var job = {};
+    //     let job = {};
     //     job.id = JOB;
     //     job.eval = command;
 
@@ -124,7 +129,7 @@ wsServer.on('request', function(request) {
 
         debugger;
 
-        var job = JOBS[message.id];
+        const job = JOBS[message.id];
 
         if (message.error) {
             job.rejecter(message.error)
@@ -146,7 +151,7 @@ wsServer.on('request', function(request) {
     });
 
     function testCommand(fun) {
-        var cmd = {};
+        const cmd = {};
         cmd.id = JOB++;
         cmd.eval = fun.toString();
 
@@ -154,7 +159,7 @@ wsServer.on('request', function(request) {
     };
 
     // function getOS() {
-    //     var OS = require('os');
+    //     let OS = require('os');
     //     return os.hostname();
     // }
 

@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 'use strict';
-var Promise = require('bluebird');
-var WebSocketClient = require('websocket').client;
-var vm = require('vm');
-var os = Promise.promisifyAll(require('os'));
-var dns = Promise.promisifyAll(require('dns'));
+const Promise = require('bluebird');
+const WebSocketClient = require('websocket').client;
+const vm = require('vm');
+const os = Promise.promisifyAll(require('os'));
+const dns = Promise.promisifyAll(require('dns'));
 
-var client = new WebSocketClient();
+const client = new WebSocketClient();
 
-var sandbox = {};
+let sandbox = {};
 sandbox.require = require;
 sandbox.os = os;
 sandbox.dns = dns;
@@ -20,13 +20,13 @@ client.on('connectFailed', function(error) {
     console.log('Connect Error: ' + error.toString());
 });
 
-var QUEUED_JOBS = [];
+const QUEUED_JOBS = [];
 
 client.on('connect', function(connection) {
 
     function sendResponse(jobId, value, error) {
         if (connection.connected) {
-            var send = {};
+            let send = {};
             send.id = jobId;
             send.value = value;
             send.error = error;
@@ -58,11 +58,11 @@ client.on('connect', function(connection) {
         if (message.type === 'utf8') {
             console.log("Received: '" + message.utf8Data + "'");
 
-            var cmd = JSON.parse(message.utf8Data);
-            var id = cmd.id;
-            var promise;
+            let cmd = JSON.parse(message.utf8Data);
+            let id = cmd.id;
+            let promise;
             // JOBS[id] = {};
-            // var job = JOBS[id];
+            // let job = JOBS[id];
             // job.id = cmd.id;
 
             try {
