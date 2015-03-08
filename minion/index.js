@@ -67,19 +67,12 @@ client.on('connect', function(connection) {
             debugger;
             let fun = fntools.s2f(command.script);
 
-            try {              
-                promise = vm.runInContext(
+            Promise.try(function () {
+                return vm.runInContext(
                     fntools.apply2s(fun)
                     , sandbox);
-                
-                if (!Promise.is(promise)) {
-                    promise = Promise.resolve(promise);
-                }
-            } catch (error) {
-                promise = Promise.reject(promise);
-            }
-
-            promise.then(function (value) {
+            })
+            .then(function (value) {
                 sendResponse(id, value);
             }, function (error) {
                 sendResponse(id, null, error);

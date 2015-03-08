@@ -28,3 +28,11 @@ module.exports.ifconfig2 = function() {
     
     return streamToString(p.stdout);
 }
+
+module.exports.ifconfig3 = function() {
+    var streamToString = require('stream-to-string')
+    var spawn = require('child_process').spawn;
+    var p = spawn('ifconfig');
+    
+    return streamToString(p.stdout);
+}
