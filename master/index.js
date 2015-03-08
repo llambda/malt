@@ -6,14 +6,10 @@ const http = require('http');
 const mime = require('mime-types')
 const commands = require('./commands');
 const express = require('express');
+const _ = require('lodash');
 
 const app = express();
-
-// const server = http.createServer(function(request, response) {
-//     console.log((new Date()) + ' Received request for ' + request.url);
-//     response.writeHead(404);
-//     response.end();
-// });
+app.use(express.static(__dirname + '/static'));
 
 const server = http.createServer(app).listen(7770, function() {
     console.log((new Date()) + ' Server is listening on port 7770');
@@ -86,6 +82,7 @@ function runRemotely(connection, fn, args) {
 }
 
 wsServer.on('request', function(request) {
+    debugger;
 
     // console.log(request.httpRequest);
 
@@ -94,6 +91,12 @@ wsServer.on('request', function(request) {
       request.reject();
       console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
       return;
+    }
+
+    if (_.contains(request.requestedProtocols, 'web')) {
+        console.log('derp')
+        let connection = request.accept('web', request.origin);
+        return;
     }
 
     let connection = request.accept('minion', request.origin);
