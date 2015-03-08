@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "cd master/static && browserify webclient.js > browserified.js"
+    "build": "cd master/static && browserify webclient.js > browserified.js",
+    "watch": "cd master/static && watchify webclient.js -o browserified.js"
   },
   "author": "",
   "license": "ISC",
