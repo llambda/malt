@@ -20,7 +20,7 @@ client.onopen = function() {
 };
  
 client.onclose = function() {
-    console.log('echo-protocol Client Closed');
+    console.log('Web Client Closed');
 };
  
 client.onmessage = function(e) {

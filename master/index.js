@@ -37,6 +37,7 @@ let JOB = 0;
 const JOBS = [];
 
 const minions = [];
+const browsers = [];
 
 setInterval(function () {
     console.log('JOB# ' + JOB);
@@ -45,10 +46,17 @@ setInterval(function () {
 }, 5000);
  
 
+function updateBrowsers(data) {
+    browsers.map(function (connection) {
+        connection.sendUTF(JSON.stringify(data));
+    })
+}
+
 function runCommandOnAllMinions(command, args) {
     return Promise.all(minions.map(function (minion) {
         return runRemotely(minion, command, args);
-    }));
+    }))
+    .then(updateBrowsers)
 }
 
 setInterval(function () {
@@ -96,6 +104,18 @@ wsServer.on('request', function(request) {
     if (_.contains(request.requestedProtocols, 'web')) {
         console.log('derp')
         let connection = request.accept('web', request.origin);
+
+        browsers.push(connection);
+
+        connection.on('message', function (message) {
+          console.log((new Date()) + ' web Connection accepted.');
+        })
+
+        connection.on('close', function (reasonCode, description) {
+          console.log((new Date()) + ' web Connection closed '+ reasonCode + ' ' + description);
+          _.remove(browsers, connection);
+        })
+
         return;
     }
 
@@ -122,6 +142,7 @@ wsServer.on('request', function(request) {
     })
 
     connection.on('close', function(reasonCode, description) {
-        console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
+        console.log((new Date()) + ' Minion ' + connection.remoteAddress + ' disconnected.');
+        _.remove(minions, connection);
     });
 });
