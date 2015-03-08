@@ -50,7 +50,6 @@ setInterval(function () {
         return runRemotely(minion, commands.getOS);
     })).then(console.log);
        
-
     // runRemotely(getOS).then(function (x) { console.log(x)});
 }, 1000);
 
@@ -95,30 +94,6 @@ wsServer.on('request', function(request) {
     let connection = request.accept('minion', request.origin);
 
     minions.push(connection);
-    // connection.remoteAddresses.forEach(function (address) {
-    //     minions.push(address, connection);
-    // })
-
-    // debugger;
-
-    // function runRemotely(command /* string*/) {
-    //     JOB++;
-
-    //     let job = {};
-    //     job.id = JOB;
-    //     job.eval = command;
-
-    //     connection.sendUTF(JSON.stringify(job));
-
-    //     job.connection = connection;
-    //     job.promise = new Promise(function (resolver, rejecter) {
-    //         job.resolver = resolver;
-    //         job.rejecter = rejecter;
-    //     });
-
-    //     JOBS[job.id] = job;
-    //     return job.promise;
-    // }
 
     connection.on('message', function (message) {
         console.log((new Date()) + ' malt Connection accepted.');
@@ -129,8 +104,6 @@ wsServer.on('request', function(request) {
 
         message = JSON.parse(message.utf8Data);
 
-        // debugger;
-
         const job = JOBS[message.id];
 
         if (message.error) {
@@ -140,33 +113,7 @@ wsServer.on('request', function(request) {
         }
     })
 
-    // connection.on('message', function(message) {
-    //     if (message.type === 'utf8') {
-    //         console.log('Received Message: ' + message.utf8Data);
-    //     }
-    //     else if (message.type === 'binary') {
-    //         console.log('Received Binary Message of ' + message.binaryData.length + ' bytes');
-    //     }
-    // });
     connection.on('close', function(reasonCode, description) {
         console.log((new Date()) + ' Peer ' + connection.remoteAddress + ' disconnected.');
     });
-
-    function testCommand(fun) {
-        const command = {};
-        command.id = JOB++;
-        command.script = fun.toString();
-        command.arguments = [];
-        command['content-type'] = mime.lookup('.js');
-
-        debugger;
-
-        connection.sendUTF(JSON.stringify(command));
-    };
-
-    // function getOS() {
-    //     let OS = require('os');
-    //     return os.hostname();
-    // }
-
 });
