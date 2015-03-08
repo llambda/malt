@@ -38,10 +38,10 @@ minion.view = function() {
       m("table", [
         _.map(minion.vm.greeting, function(minion, index) {
           return m("tr", [
-            m("td", {style: {textDecoration: "none"}}, minion.hostname),
-            m("td", {style: {textDecoration: "none"}}, minion.uptime),
-            m("td", {style: {textDecoration: "none"}}, minion.totalmem),
-            m("td", {style: {textDecoration: "none"}}, minion.freemem),
+            m("td", {style: {color: "red"}}, minion.hostname),
+            m("td", null, minion.uptime),
+            m("td", null, minion.totalmem),
+            m("td", null, minion.freemem),
             ])
         })
       ])
