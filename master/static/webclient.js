@@ -1,5 +1,6 @@
 
 var m = require('mithril');
+var _ = require('lodash');
 
 var minion = {};
 minion.MinionList = Array;
@@ -32,18 +33,30 @@ minion.controller = function() {
 }
 
 minion.view = function() {
-  return m("html", [
-    m("p", minion.vm.greeting),
+  return m("html", [    
     m("body", [
       m("table", [
-        minion.vm.list.map(function(minion, index) {
+        _.map(minion.vm.greeting, function(minion, index) {
           return m("tr", [
-            m("td", {style: {textDecoration: "none"}}, minion.description()),
+            m("td", {style: {textDecoration: "none"}}, minion.hostname),
+            m("td", {style: {textDecoration: "none"}}, minion.uptime),
+            m("td", {style: {textDecoration: "none"}}, minion.totalmem),
+            m("td", {style: {textDecoration: "none"}}, minion.freemem),
             ])
         })
-        ])
       ])
-    ]);
+    ]), 
+   
+    // m("body", [
+    //   m("table", [
+    //     minion.vm.list.map(function(minion, index) {
+    //       return m("tr", [
+    //         m("td", {style: {textDecoration: "none"}}, minion.description()),
+    //         ])
+    //     })
+    //     ])
+    //   ])
+  ]);
 };
 
 var ctrl =  m.module(document, {controller: minion.controller, view: minion.view});
@@ -57,7 +70,7 @@ client.onmessage = function(e) {
     console.log("Received: '" + e.data + "'");
     var o = JSON.parse(e.data);
 
-    ctrl.changeGreeting(e.data)
+    ctrl.changeGreeting(o )
 
     m.redraw(true);
   }
