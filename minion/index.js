@@ -10,13 +10,9 @@ const fntools = require('function-serialization-tools')
 
 const client = new WebSocketClient();
 
-let sandbox = {};
-sandbox.require = require;
-sandbox.os = os;
-sandbox.dns = dns;
-sandbox.Promise = Promise;
-sandbox.child_process = Promise.promisifyAll(require('child_process'));
-vm.createContext(sandbox);
+const DefaultSandbox = require('./sandboxes/default')();
+
+vm.createContext(DefaultSandbox);
 
 client.on('connectFailed', function(error) {
     console.log('Connect Error: ' + error.toString());
@@ -68,7 +64,7 @@ client.on('connect', function(connection) {
             Promise.try(function () {
                 return vm.runInContext(
                     fntools.apply2s(fun, command.args)
-                    , sandbox);
+                    , DefaultSandbox);
             })
             .then(function (value) {
                 sendResponse(id, value);
