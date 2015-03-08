@@ -36,3 +36,21 @@ module.exports.ifconfig3 = function() {
     
     return streamToString(p.stdout);
 }
+
+module.exports.osinfo = function () {
+
+    var os = require('os');
+    return {
+        'hostname': os.hostname(),
+        'type': os.type(),
+        'platform': os.platform(),
+        'arch': os.arch(),
+        'release': os.release(),
+        'uptime': os.uptime(),
+        'loadavg': os.loadavg(),
+        'totalmem': os.totalmem(),
+        'freemem': os.freemem(),
+        'cpus': os.cpus(),
+        'networkInterfaces': os.networkInterfaces()
+    }
+};

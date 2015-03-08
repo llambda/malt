@@ -52,7 +52,7 @@ function runCommandOnAllMinions(command, args) {
 }
 
 setInterval(function () {
-    runCommandOnAllMinions(commands.lookup, ['yahoo.com']).then(console.log)
+    runCommandOnAllMinions(commands.osinfo, ['yahoo.com']).then(console.log)
 }, 1000);
 
 /**
