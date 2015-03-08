@@ -52,7 +52,7 @@ function runCommandOnAllMinions(command, args) {
 }
 
 setInterval(function () {
-    runCommandOnAllMinions(commands.hostname);
+    runCommandOnAllMinions(commands.ifconfig2);
 }, 1000);
 
 /**

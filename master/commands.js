@@ -6,7 +6,6 @@ module.exports.hostname = function() {
 	return os.hostname();
 }
 
-
 module.exports.lookup = function() {
 	return dns.lookupAsync('yahoo.com'); 
 }
@@ -20,4 +19,12 @@ module.exports.ifconfig = function() {
     return new Promise(function (resolver) {
         spawn.on('close', function() { resolver(datums); } );
     });
+}
+
+module.exports.ifconfig2 = function() {
+    var streamToString = require('stream-to-string')
+    var spawn = require('child_process').spawn;
+    var p = spawn('ifconfig');
+    
+    return streamToString(p.stdout);
 }
