@@ -5,6 +5,7 @@ const WebSocketClient = require('websocket').client;
 const vm = require('vm');
 const os = Promise.promisifyAll(require('os'));
 const dns = Promise.promisifyAll(require('dns'));
+const npm = require('npm');
 
 const client = new WebSocketClient();
 
@@ -61,13 +62,9 @@ client.on('connect', function(connection) {
             let cmd = JSON.parse(message.utf8Data);
             let id = cmd.id;
             let promise;
-            // JOBS[id] = {};
-            // let job = JOBS[id];
-            // job.id = cmd.id;
 
-            try {
-                
-                promise = vm.runInContext(cmd.eval, sandbox);
+            try {              
+                promise = vm.runInContext(cmd.script, sandbox);
                 
                 if (!Promise.is(promise)) {
                     promise = Promise.resolve(promise);

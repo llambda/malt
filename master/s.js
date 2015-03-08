@@ -3,7 +3,7 @@
 const Promise = require('bluebird');
 const WebSocketServer = require('websocket').server;
 const http = require('http');
-
+const mime = require('mime-types')
 const commands = require('./commands');
 
 const server = http.createServer(function(request, response) {
@@ -151,11 +151,12 @@ wsServer.on('request', function(request) {
     });
 
     function testCommand(fun) {
-        const cmd = {};
-        cmd.id = JOB++;
-        cmd.eval = fun.toString();
+        const command = {};
+        command.id = JOB++;
+        command.script = fun.toString();
+        command['content-type'] = mime.lookup('.js');
 
-        connection.sendUTF(JSON.stringify(cmd));
+        connection.sendUTF(JSON.stringify(command));
     };
 
     // function getOS() {
