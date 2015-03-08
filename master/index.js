@@ -5,13 +5,17 @@ const WebSocketServer = require('websocket').server;
 const http = require('http');
 const mime = require('mime-types')
 const commands = require('./commands');
+const express = require('express');
 
-const server = http.createServer(function(request, response) {
-    console.log((new Date()) + ' Received request for ' + request.url);
-    response.writeHead(404);
-    response.end();
-});
-server.listen(7770, function() {
+const app = express();
+
+// const server = http.createServer(function(request, response) {
+//     console.log((new Date()) + ' Received request for ' + request.url);
+//     response.writeHead(404);
+//     response.end();
+// });
+
+const server = http.createServer(app).listen(7770, function() {
     console.log((new Date()) + ' Server is listening on port 7770');
 });
 
