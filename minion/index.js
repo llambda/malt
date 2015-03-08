@@ -64,7 +64,6 @@ client.on('connect', function(connection) {
             let id = command.id;
             let promise;
 
-            debugger;
             let fun = fntools.s2f(command.script);
 
             Promise.try(function () {

@@ -60,7 +60,6 @@ setInterval(function () {
  * Returns a function that takes a command string that will run on that minion.
  */
 function runRemotely(connection, fn, args) {
-    debugger;
     if (typeof fn !== 'function') throw new TypeError('I need a Function!');
     
     JOB++;
