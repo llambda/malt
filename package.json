@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "bluebird": "^2.9.13",
+    "function-serialization-tools": "^1.0.0",
     "mime-types": "^2.0.9",
     "npm": "^2.7.0",
     "websocket": "^1.0.17"

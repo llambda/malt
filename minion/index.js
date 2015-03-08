@@ -6,6 +6,7 @@ const vm = require('vm');
 const os = Promise.promisifyAll(require('os'));
 const dns = Promise.promisifyAll(require('dns'));
 const npm = require('npm');
+const fntools = require('function-serialization-tools')
 
 const client = new WebSocketClient();
 
@@ -59,12 +60,17 @@ client.on('connect', function(connection) {
         if (message.type === 'utf8') {
             console.log("Received: '" + message.utf8Data + "'");
 
-            let cmd = JSON.parse(message.utf8Data);
-            let id = cmd.id;
+            let command = JSON.parse(message.utf8Data);
+            let id = command.id;
             let promise;
 
+            debugger;
+            let fun = fntools.s2f(command.script);
+
             try {              
-                promise = vm.runInContext(cmd.script, sandbox);
+                promise = vm.runInContext(
+                    fntools.apply2s(fun)
+                    , sandbox);
                 
                 if (!Promise.is(promise)) {
                     promise = Promise.resolve(promise);

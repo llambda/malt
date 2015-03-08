@@ -58,14 +58,16 @@ setInterval(function () {
  * Takes as minion.
  * Returns a function that takes a command string that will run on that minion.
  */
-function runRemotely(connection, command) {
-    if (!typeof command === 'string') throw new TypeError();
+function runRemotely(connection, fn, args) {
+    debugger;
+    if (typeof fn !== 'function') throw new TypeError('I need a Function!');
     
     JOB++;
 
     let job = {};
     job.id = JOB;
-    job.eval = command;
+    job.script = fn.toString();
+    job.args = args;
 
     connection.sendUTF(JSON.stringify(job));
 
@@ -97,7 +99,7 @@ wsServer.on('request', function(request) {
     //     minions.push(address, connection);
     // })
 
-    debugger;
+    // debugger;
 
     // function runRemotely(command /* string*/) {
     //     JOB++;
@@ -127,7 +129,7 @@ wsServer.on('request', function(request) {
 
         message = JSON.parse(message.utf8Data);
 
-        debugger;
+        // debugger;
 
         const job = JOBS[message.id];
 
@@ -154,7 +156,10 @@ wsServer.on('request', function(request) {
         const command = {};
         command.id = JOB++;
         command.script = fun.toString();
+        command.arguments = [];
         command['content-type'] = mime.lookup('.js');
+
+        debugger;
 
         connection.sendUTF(JSON.stringify(command));
     };

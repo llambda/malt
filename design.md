@@ -6,8 +6,9 @@ Master sends tasks as JSON:
 
 {
 	"id": 1,
-	"script": " os.hostname(); "
-	"content-type": "javascript"
+	"script": " function () { os.hostname(); } ",
+	"content-type": "javascript",
+	"arguments": []
 }
 
 Minions return task results as JSON:
