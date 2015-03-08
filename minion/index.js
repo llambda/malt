@@ -62,13 +62,12 @@ client.on('connect', function(connection) {
 
             let command = JSON.parse(message.utf8Data);
             let id = command.id;
-            let promise;
 
             let fun = fntools.s2f(command.script);
 
             Promise.try(function () {
                 return vm.runInContext(
-                    fntools.apply2s(fun)
+                    fntools.apply2s(fun, command.args)
                     , sandbox);
             })
             .then(function (value) {

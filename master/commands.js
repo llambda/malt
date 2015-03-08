@@ -6,8 +6,8 @@ module.exports.hostname = function() {
 	return os.hostname();
 }
 
-module.exports.lookup = function() {
-	return dns.lookupAsync('yahoo.com'); 
+module.exports.lookup = function(host) {
+	return dns.lookupAsync(host); 
 }
 
 module.exports.ifconfig = function() {
