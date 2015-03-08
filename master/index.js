@@ -44,13 +44,15 @@ setInterval(function () {
         console.log('# of connected minions ' + minions.length);
 }, 5000);
  
-setInterval(function () {
 
-    Promise.all(minions.map(function (minion) {
-        return runRemotely(minion, commands.getOS);
-    })).then(console.log);
-       
-    // runRemotely(getOS).then(function (x) { console.log(x)});
+function runCommandOnAllMinions(command, args) {
+    return Promise.all(minions.map(function (minion) {
+        return runRemotely(minion, command, args);
+    }));
+}
+
+setInterval(function () {
+    runCommandOnAllMinions(commands.hostname);
 }, 1000);
 
 /**

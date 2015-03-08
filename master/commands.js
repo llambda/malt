@@ -2,7 +2,7 @@ module.exports.throws = function () {
 	throw new Error('hi')
 };
 
-module.exports.getOS = function() {
+module.exports.hostname = function() {
 	return os.hostname();
 }
 
