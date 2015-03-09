@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "cd master/static && browserify webclient.js > browserified.js",
-    "watch": "cd master/static && watchify webclient.js -o browserified.js"
+    "watch": "cd master/static && watchify webclient.js -o browserified.js --debug --verbose"
   },
   "author": "",
   "license": "ISC",
@@ -18,6 +18,7 @@
     "mime-types": "^2.0.9",
     "mithril": "^0.1.30",
     "npm": "^2.7.0",
+    "shelljs": "^0.3.0",
     "stream-to-string": "^1.0.0",
     "websocket": "^1.0.17"
   }

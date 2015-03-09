@@ -39,29 +39,71 @@ const JOBS = [];
 const minions = [];
 const browsers = [];
 
-setInterval(function () {
-    console.log('JOB# ' + JOB);
-    if (minions.length > 0)
-        console.log('# of connected minions ' + minions.length);
-}, 5000);
+// setInterval(function () {
+//     console.log('JOB# ' + JOB);
+//     if (minions.length > 0)
+//         console.log('# of connected minions ' + minions.length);
+// }, 5000);
  
 
-function updateBrowsers(data) {
+function updateBrowsers(job) {
+    // debugger;
     browsers.map(function (connection) {
-        connection.sendUTF(JSON.stringify(data));
+        job.message = 'status';
+        var response = JSON.stringify(job);
+        connection.sendUTF(response);
+    })
+
+    return job;
+}
+
+// function updateBrowsers(data) {
+//     browsers.map(function (connection) {
+//         connection.sendUTF(JSON.stringify(data));
+//     })
+// }
+
+function jobDone(job) {
+    if (!job.promise.isFulfilled()) {
+        throw new Error("Promise must be fullfilled.");
+    }
+    var o = {};
+    o.message = 'jobdone';
+    o.id = job.id;
+    // o.minion = minion;
+
+    if (job.promise.isRejected())
+        o.error = job.promise.reason();
+    else 
+        o.value = job.promise.value();
+
+    browsers.map(function (connection) {
+        connection.sendUTF(JSON.stringify(o));
     })
 }
 
 function runCommandOnAllMinions(command, args) {
     return Promise.all(minions.map(function (minion) {
-        return runRemotely(minion, command, args);
+        return runRemotely(minion, command, args).promise;
     }))
     .then(updateBrowsers)
 }
 
-setInterval(function () {
-    runCommandOnAllMinions(commands.osinfo, ['yahoo.com']).then(console.log)
-}, 1000);
+function runCommandOnAllMinions2(command, args) {
+    return Promise.all(minions.map(function (minion) {
+        var job = runRemotely(minion, command, args);
+        job.promise.then(function () {
+            jobDone(job);
+        });
+        return job.promise;
+    }))
+    .then(updateBrowsers)
+}
+
+// setInterval(function () {
+//     runCommandOnAllMinions2(commands.osinfo, ['yahoo.com'])
+//     // .then(console.log)
+// }, 1000);
 
 /**
  * Takes as minion.
@@ -73,6 +115,7 @@ function runRemotely(connection, fn, args) {
     JOB++;
 
     let job = {};
+    job.message = 'newjob';
     job.id = JOB;
     job.script = fn.toString();
     job.args = args;
@@ -86,12 +129,10 @@ function runRemotely(connection, fn, args) {
     });
 
     JOBS[job.id] = job;
-    return job.promise;
+    return job;
 }
 
 wsServer.on('request', function(request) {
-    debugger;
-
     // console.log(request.httpRequest);
 
     if (!originIsAllowed(request.origin)) {
@@ -101,18 +142,30 @@ wsServer.on('request', function(request) {
       return;
     }
 
-    if (_.contains(request.requestedProtocols, 'web')) {
-        console.log('derp')
-        let connection = request.accept('web', request.origin);
+    if (_.contains(request.requestedProtocols, 'command')) {
+        let connection = request.accept('command', request.origin);
 
         browsers.push(connection);
 
         connection.on('message', function (message) {
-          console.log((new Date()) + ' web Connection accepted.');
+          console.log((new Date()) + ' ' + JSON.stringify(message) + ' command message received.');
+
+            var o = JSON.parse(message.utf8Data);
+
+            debugger;
+            if (o.message === 'newcommand') {
+                runCommandOnAllMinions2(commands[o.command], o.arguments);
+            } else {
+                console.log('unknown command received');
+            }
+          
+          // if (message.utf8Data === 'refresh') {
+          //   console.log('REFRESHAHHH');
+          // }
         })
 
         connection.on('close', function (reasonCode, description) {
-          console.log((new Date()) + ' web Connection closed '+ reasonCode + ' ' + description);
+          console.log((new Date()) + ' command Connection closed '+ reasonCode + ' ' + description);
           _.remove(browsers, connection);
         })
 
@@ -124,10 +177,10 @@ wsServer.on('request', function(request) {
     minions.push(connection);
 
     connection.on('message', function (message) {
-        console.log((new Date()) + ' malt Connection accepted.');
+        console.log((new Date()) + ' minion connection accepted.');
 
         if (message.type === 'utf8') {
-            console.log('Received Message: ' + message.utf8Data);
+            // console.log('Received Message: ' + message.utf8Data);
         }
 
         message = JSON.parse(message.utf8Data);

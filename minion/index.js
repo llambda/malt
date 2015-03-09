@@ -22,10 +22,11 @@ const QUEUED_JOBS = [];
 
 client.on('connect', function(connection) {
 
-    function sendResponse(jobId, value, error) {
+    function sendResponse(id, value, error) {
         if (connection.connected) {
             let send = {};
-            send.id = jobId;
+            send.message = 'jobdone';
+            send.id = id;
             send.value = value;
             send.error = error;
 
@@ -33,15 +34,15 @@ client.on('connect', function(connection) {
             connection.sendUTF(JSON.stringify(send));            
         } else {
             QUEUED_JOBS.push({
-             jobId: jobId,
-             value: value,
-             error: error 
-         })
+               id: id,
+               value: value,
+               error: error 
+           })
         }
     }
 
     QUEUED_JOBS.forEach(function (job) {
-        sendResponse(job.jobId, job,value, job.error);
+        sendResponse(job.id, job, value, job.error);
     });
 
     console.log('WebSocket Client Connected');
@@ -57,20 +58,25 @@ client.on('connect', function(connection) {
             console.log("Received: '" + message.utf8Data + "'");
 
             let command = JSON.parse(message.utf8Data);
-            let id = command.id;
 
-            let fun = fntools.s2f(command.script);
+            if (command.message === 'newjob') {
+                let id = command.id;
 
-            Promise.try(function () {
-                return vm.runInContext(
-                    fntools.apply2s(fun, command.args)
-                    , DefaultSandbox);
-            })
-            .then(function (value) {
-                sendResponse(id, value);
-            }, function (error) {
-                sendResponse(id, null, error);
-            })
+                let fun = fntools.s2f(command.script);
+
+                Promise.try(function () {
+                    return vm.runInContext(
+                        fntools.apply2s(fun, command.args)
+                        , DefaultSandbox);
+                })
+                .then(function (value) {
+                    sendResponse(id, value);
+                }, function (error) {
+                    sendResponse(id, null, error);
+                })
+            } else {
+                throw new Error("unknown command");
+            }
         }
     });
 });
