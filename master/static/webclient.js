@@ -188,6 +188,7 @@ window.addEventListener('load', function() {
         ctrl.loadMinions(o);
       }
 
+      m.redraw(true);
     }
   };
 
