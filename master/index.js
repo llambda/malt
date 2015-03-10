@@ -70,6 +70,7 @@ function jobDone(job) {
     var o = {};
     o.message = 'jobdone';
     o.id = job.id;
+    o.command = job.command;
     // o.minion = minion;
 
     if (job.promise.isRejected())
@@ -109,15 +110,19 @@ function runCommandOnAllMinions2(command, args) {
  * Takes as minion.
  * Returns a function that takes a command string that will run on that minion.
  */
-function runRemotely(connection, fn, args) {
-    if (typeof fn !== 'function') throw new TypeError('I need a Function!');
+function runRemotely(connection, command, args) {
+    // if (typeof fn !== 'function') {
+    //     debugger;
+    //     throw new TypeError('I need a Function!');
+    // }
     
     JOB++;
 
     let job = {};
     job.message = 'newjob';
     job.id = JOB;
-    job.script = fn.toString();
+    job.command = command;
+    job.script = commands[command].toString();
     job.args = args;
 
     connection.sendUTF(JSON.stringify(job));
@@ -152,9 +157,9 @@ wsServer.on('request', function(request) {
 
             var o = JSON.parse(message.utf8Data);
 
-            debugger;
+            // debugger;
             if (o.message === 'newcommand') {
-                runCommandOnAllMinions2(commands[o.command], o.arguments);
+                runCommandOnAllMinions2(o.command, o.arguments);
             } else {
                 console.log('unknown command received');
             }

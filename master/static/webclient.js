@@ -85,6 +85,13 @@ minion.controller = function() {
     o.id = id++;
     client.send(JSON.stringify(o));
   }
+
+  this.customRun = m.prop('random');
+
+  this.run = function() {
+    this.command(this.customRun());
+  }.bind(this);
+
 }
 
 function displayMinion(minion) {
@@ -121,6 +128,14 @@ function displayMinionHeader() {
 
 minion.view = function(controller) {
   return [m("h1", "minions"),
+  m("input", {
+    type: 'text',
+    value: controller.customRun(),
+    onchange: m.withAttr("value", controller.customRun) 
+  }),
+
+  m("button", { onclick: controller.run }, "run"),
+
   m("button", {
     onclick: function() {
       controller.command('osinfo');
@@ -130,7 +145,8 @@ minion.view = function(controller) {
   m("table", [
     m("thead", displayMinionHeader()),
     m("tbody", controller.getMinions().map(function (item) {
-      return displayMinion(item);
+      // return displayMinion(item);
+      return JSON.stringify(item);
     }))
   ])
   ]

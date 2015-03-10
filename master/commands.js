@@ -2,6 +2,11 @@ module.exports.throws = function () {
 	throw new Error('hi')
 };
 
+module.exports.random = function () {
+    return Math.random();
+};
+
+
 module.exports.hostname = function() {
 	return os.hostname();
 }
