@@ -18,18 +18,31 @@ jobs.controller = function() {
       return b.id - a.id;
     })
 
-    if (this.jobs.length > 3) {
-      this.jobs = this.jobs.slice(0, 3);
-    }
+    // if (this.jobs.length > 3) {
+    //   this.jobs = this.jobs.slice(0, 3);
+    // }
   }
 }
 
+var tablestyle = {
+      'border': '1px solid black'
+    }
+
 jobs.view = function(ctrl) {
 
-  return m("p", [ctrl.get().map(function (item) {
-    return m('p', JSON.stringify(item))
-  })
-  ])
+  return m("table",
+    {style: tablestyle},
+    m('thead', [
+      m('td', 'id'),
+      m('td', 'value'),
+      m('td', 'error')
+    ]),
+
+    m('tbody', ctrl.get().map(function (item) {
+      return m('tr',
+        m('td', item.id), m('td', JSON.stringify(item.value)), m('td', JSON.stringify(item.error)))
+    }))
+  )
 };
 
 
@@ -127,7 +140,7 @@ function displayMinionHeader() {
 }
 
 minion.view = function(controller) {
-  return [m("h1", "minions"),
+  return [
   m("input", {
     type: 'text',
     value: controller.customRun(),
@@ -142,7 +155,7 @@ minion.view = function(controller) {
     }
   }, "osinfo command"),
   
-  m("table", [
+  m("table", {style: tablestyle}, [
     m("thead", displayMinionHeader()),
     m("tbody", controller.getMinions().map(function (item) {
       // return displayMinion(item);
@@ -157,7 +170,7 @@ minion.view = function(controller) {
 var client;
 
 window.addEventListener('load', function() {
-  var ctrl =  m.module(document.getElementById('status'), {controller: minion.controller, view: minion.view});
+  var cmdctrl =  m.module(document.getElementById('commands'), {controller: minion.controller, view: minion.view});
   var jobsctrl = m.module(document.getElementById('jobs'), jobs);
 
   var W3CWebSocket = require('websocket').w3cwebsocket;
@@ -181,14 +194,14 @@ window.addEventListener('load', function() {
         jobsctrl.add(o);
       } else if (o.mesage === ' status') {
         console.log('minions');
-        ctrl.loadMinions(o);
+        cmdctrl.loadMinions(o);
       } else {
         // debugger;
         // throw new Error('unknown message ' + o.message);
-        ctrl.loadMinions(o);
+        cmdctrl.loadMinions(o);
       }
 
-      m.redraw(true);
+      m.redraw();
     }
   };
 

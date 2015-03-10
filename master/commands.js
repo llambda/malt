@@ -59,3 +59,8 @@ module.exports.osinfo = function () {
         'networkInterfaces': os.networkInterfaces()
     }
 };
+
+module.exports.uptime = function () {
+    var os = require('os');
+    return os.uptime();
+};
