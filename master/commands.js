@@ -6,6 +6,15 @@ module.exports.random = function () {
     return Math.random();
 };
 
+module.exports.slowrandom = function () {
+    var Promise = require('bluebird');
+
+    var rando = Math.random() * 2000;
+
+    return Promise.delay(rando).then(function () {
+        return rando;
+    })
+};
 
 module.exports.hostname = function() {
 	return os.hostname();

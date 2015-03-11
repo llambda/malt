@@ -77,7 +77,7 @@ commands.controller = function() {
     client.send(JSON.stringify(o));
   }
 
-  this.customRun = m.prop('random');
+  this.customRun = m.prop('slowrandom');
 
   this.run = function() {
     this.command(this.customRun());
