@@ -46,12 +46,14 @@ const browsers = [];
 // }, 5000);
  
 
-function updateBrowsers(job) {
+function updateBrowsers(command, job) {
     // debugger;
     browsers.map(function (connection) {
-        job.message = 'status';
-        var response = JSON.stringify(job);
-        connection.sendUTF(response);
+        var o = {};
+        o.message = 'commanddone';
+        o.response = job;
+        o.command = command;
+        connection.sendUTF(JSON.stringify(o));
     })
 
     return job;
@@ -98,7 +100,9 @@ function runCommandOnAllMinions2(command, args) {
         });
         return job.promise;
     }))
-    .then(updateBrowsers)
+    .then(function (value) {
+        updateBrowsers(command, value);
+    })
 }
 
 // setInterval(function () {

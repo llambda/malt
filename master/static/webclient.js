@@ -45,49 +45,27 @@ jobs.view = function(ctrl) {
   )
 };
 
-
-var minion = {};
-minion.MinionList = Array;
-minion.Minion = function(data) {
-  this.description = m.prop(data.description);
-};
-
-minion.vm = (function() {
-  var vm = {}
-  vm.init = function() {
-    vm.list = new minion.MinionList();
-    vm.description = m.prop("");
-    vm.add = function() {
-      if (vm.description()) {
-        vm.list.push(new minion.Minion({description: vm.description()}));
-        vm.description("");
-      }
-    };
-  }
-  return vm
-}())
-
-minion.controller = function() {
+var commands = {};
+commands.controller = function() {
   var id = 0;
 
-  // minion.vm.init()
-  minion.vm.greeting = [];
-  minion.vm.minions = [];
-
-  this.changeGreeting = function (greet) {
-    minion.vm.greeting.push(greet);
-  }
+  this.commands = [];
 
   this.get = function() {
-    return minion.vm.greeting;
+    return this.commands;
   }
 
-  this.loadMinions = function(minions) {
-    minion.vm.minions = minions;
-  }
+  this.add = function (commands) {
 
-  this.getMinions = function() {
-    return minion.vm.minions;
+    this.commands.unshift(commands);
+
+    // this.commands = this.commands.sort(function (a, b) {
+    //   return b.id - a.id;
+    // })
+
+    // if (this.jobs.length > 3) {
+    //   this.jobs = this.jobs.slice(0, 3);
+    // }
   }
 
   this.command = function(command, event) {
@@ -104,42 +82,10 @@ minion.controller = function() {
   this.run = function() {
     this.command(this.customRun());
   }.bind(this);
-
 }
 
-function displayMinion(minion) {
-  return m("tr", [
-      m("td", {style: {color: "red"}}, minion.hostname),
-      m("td", minion.uptime),
-      m("td", minion.totalmem),
-      m("td", minion.freemem),
-      m("td", minion.cpus.length),
-      m("td", minion.loadavg[0]),
-      m("td", minion.loadavg[1]),
-      m("td", minion.loadavg[2]),
-      m("td", minion.arch),
-      m("td", minion.platform),
-      m('td', minion.release)
-    ])
-}
 
-function displayMinionHeader() {
-  return m("tr", [
-      m("td", {style: {color: "red"}}, 'hostname'),
-      m("td", 'uptime'),
-      m("td", 'totalmem'),
-      m("td", 'freemem'),
-      m("td", 'cpus'),
-      m("td", 'loadavg0'),
-      m("td", 'loadavg1'),
-      m("td", 'loadavg2'),
-      m("td", 'arch'),
-      m('td', 'platform'),
-      m('td', 'release')
-    ])
-}
-
-minion.view = function(controller) {
+commands.view = function(controller) {
   return [
   m("input", {
     type: 'text',
@@ -156,21 +102,33 @@ minion.view = function(controller) {
   }, "osinfo command"),
   
   m("table", {style: tablestyle}, [
-    m("thead", displayMinionHeader()),
-    m("tbody", controller.getMinions().map(function (item) {
-      // return displayMinion(item);
-      return JSON.stringify(item);
+    m("thead", displayCommandHeader()),
+    m("tbody", controller.get().map(function (command) {
+      return displayCommand(command);
+      // return JSON.stringify(command);
     }))
   ])
   ]
 };
 
-// ctrl.changeGreeting('hello there');
+function displayCommand(command) {
+  return m("tr", [
+      m("td", {style: {color: "red"}}, command.command),
+      m("td", JSON.stringify(command.response))
+    ])
+}
+
+function displayCommandHeader() {
+  return m("tr", [
+      m("td", {style: {color: "red"}}, 'command name'),
+      m("td", 'response')
+    ])
+}
 
 var client;
 
 window.addEventListener('load', function() {
-  var cmdctrl =  m.module(document.getElementById('commands'), {controller: minion.controller, view: minion.view});
+  var cmdctrl =  m.module(document.getElementById('commands'), {controller: commands.controller, view: commands.view});
   var jobsctrl = m.module(document.getElementById('jobs'), jobs);
 
   var W3CWebSocket = require('websocket').w3cwebsocket;
@@ -178,27 +136,16 @@ window.addEventListener('load', function() {
 
   client.onmessage = function(e) {
     if (typeof e.data === 'string') {
-      // console.log("Received: '" + e.data + "'");
       var o = JSON.parse(e.data);
 
-      console.dir(o);
-
-      // if ()
-
-      // ctrl.changeGreeting(o )
-      // o.map(ctrl.changeGreeting);
-
       if (o.message === 'jobdone') {
-        // debugger;
         console.log('jobdone');
         jobsctrl.add(o);
-      } else if (o.mesage === ' status') {
-        console.log('minions');
-        cmdctrl.loadMinions(o);
+      } else if (o.message === 'commanddone') {
+        console.log('commanddone');
+        cmdctrl.add(o);
       } else {
-        // debugger;
-        // throw new Error('unknown message ' + o.message);
-        cmdctrl.loadMinions(o);
+        throw new Error('unknown message ' + o.message);
       }
 
       m.redraw();
