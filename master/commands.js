@@ -9,7 +9,7 @@ module.exports.random = function () {
 module.exports.slowrandom = function () {
     var Promise = require('bluebird');
 
-    var rando = Math.random() * 2000;
+    var rando = Math.trunc(Math.random() * 4000);
 
     return Promise.delay(rando).then(function () {
         return rando;
