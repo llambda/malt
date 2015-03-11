@@ -17,6 +17,7 @@
     "lodash": "^3.4.0",
     "mime-types": "^2.0.9",
     "mithril": "^0.1.30",
+    "node-uuid": "^1.4.3",
     "npm": "^2.7.0",
     "shelljs": "^0.3.0",
     "stream-to-string": "^1.0.0",

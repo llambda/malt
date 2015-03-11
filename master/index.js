@@ -7,6 +7,7 @@ const mime = require('mime-types')
 const commands = require('./commands');
 const express = require('express');
 const _ = require('lodash');
+const uuid = require('node-uuid');
 
 const app = express();
 app.use(express.static(__dirname + '/static'));
@@ -46,17 +47,19 @@ const browsers = [];
 // }, 5000);
  
 
-function updateBrowsers(command, job) {
+function updateBrowsers(command) {
     // debugger;
     browsers.map(function (connection) {
         var o = {};
         o.message = 'commanddone';
-        o.response = job;
-        o.command = command;
+        o.response = command.value;
+        o.id = command.id;
+        o.command = command.command;
+        debugger;
         connection.sendUTF(JSON.stringify(o));
     })
 
-    return job;
+    return command;
 }
 
 // function updateBrowsers(data) {
@@ -85,6 +88,7 @@ function jobDone(job) {
     })
 }
 
+// dont use anymore
 function runCommandOnAllMinions(command, args) {
     return Promise.all(minions.map(function (minion) {
         return runRemotely(minion, command, args).promise;
@@ -92,16 +96,25 @@ function runCommandOnAllMinions(command, args) {
     .then(updateBrowsers)
 }
 
-function runCommandOnAllMinions2(command, args) {
+// command is a command name (string)
+function runCommandOnAllMinions2(command /* command name :String */, args) {
+    var commandO = {};
+    commandO.id = uuid.v1();
+    commandO.jobs = [];
+    commandO.command = command;
+    commandO.args = []; // todo.
+
     return Promise.all(minions.map(function (minion) {
         var job = runRemotely(minion, command, args);
+        commandO.jobs.push(job);
         job.promise.then(function () {
             jobDone(job);
         });
         return job.promise;
     }))
     .then(function (value) {
-        updateBrowsers(command, value);
+        commandO.value = value;
+        updateBrowsers(commandO);
     })
 }
 

@@ -54,9 +54,16 @@ Master sends message to browser:
 	"value": 'value'
 }
 
+Command complete
+
+{ message: 'commanddone',
+  response: [ 2085, 948, 3635 ],
+  id: 'bab5c450-c790-11e4-8fb5-bd81faaea5e3',
+  command: 'slowrandom' }
+
 Browser --> Master
 
-Browser sends job requests to master.
+Browser sends command requests to master. Commands are composed of jobs.
 
 Currently: 'refresh'
 Future: 

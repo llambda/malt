@@ -113,14 +113,16 @@ commands.view = function(controller) {
 
 function displayCommand(command) {
   return m("tr", [
-      m("td", {style: {color: "red"}}, command.command),
+      m("td", {style: {color: "red"}}, command.id),
+      m("td", command.command),
       m("td", JSON.stringify(command.response))
     ])
 }
 
 function displayCommandHeader() {
   return m("tr", [
-      m("td", {style: {color: "red"}}, 'command name'),
+      m("td", {style: {color: "red"}}, 'id'),
+      m("td", 'command'),
       m("td", 'response')
     ])
 }
