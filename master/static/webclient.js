@@ -1,4 +1,17 @@
 
+var style = {};
+style.good = {
+  style: {color: "green"}
+}
+style.bad = {
+  style: {color: "red"}
+}
+style.table = {
+  style: {
+      'border': '1px solid black'
+  }
+}
+
 var m = require('mithril');
 // var _ = require('lodash');
 
@@ -11,36 +24,31 @@ jobs.controller = function() {
   }
 
   this.add = function (job) {
-
-    this.jobs.push(job);
-
-    this.jobs = this.jobs.sort(function (a, b) {
-      return b.id - a.id;
-    })
-
-    // if (this.jobs.length > 3) {
-    //   this.jobs = this.jobs.slice(0, 3);
-    // }
+    this.jobs.unshift(job);
   }
 }
 
-var tablestyle = {
-      'border': '1px solid black'
-    }
+function renderJobTd(job) {
+  if (!job.error) {
+    return m("td", style.good, JSON.stringify(job.value));
+  } else {
+    return m("td", style.bad,
+      [JSON.stringify(job.error), m("br"), m("br"), job.errorstack]);
+  }
+}
 
 jobs.view = function(ctrl) {
 
   return m("table",
-    {style: tablestyle},
+    style.table,
     m('thead', [
       m('td', 'id'),
-      m('td', 'value'),
-      m('td', 'error')
+      m('td', 'result')
     ]),
 
-    m('tbody', ctrl.get().map(function (item) {
+    m('tbody', ctrl.get().map(function (job) {
       return m('tr',
-        m('td', item.id), m('td', JSON.stringify(item.value)), m('td', JSON.stringify(item.error)))
+        m('td', job.id), renderJobTd(job))
     }))
   )
 };
@@ -101,7 +109,7 @@ commands.view = function(controller) {
     }
   }, "osinfo command"),
   
-  m("table", {style: tablestyle}, [
+  m("table", style.table, [
     m("thead", displayCommandHeader()),
     m("tbody", controller.get().map(function (command) {
       return displayCommand(command);
@@ -111,17 +119,26 @@ commands.view = function(controller) {
   ]
 };
 
+function renderCommandRow(row) {
+  if (!row.error) {
+    return m("td", style.good, JSON.stringify(row.response));
+  } else {
+    return m("td", style.bad,
+      [JSON.stringify(row.error), m("br"), m("br"), row.errorstack]);
+  }
+}
+
 function displayCommand(command) {
   return m("tr", [
-      m("td", {style: {color: "red"}}, command.id),
+      m("td", command.id),
       m("td", command.command),
-      m("td", JSON.stringify(command.response))
+      renderCommandRow(command),
     ])
 }
 
 function displayCommandHeader() {
   return m("tr", [
-      m("td", {style: {color: "red"}}, 'id'),
+      m("td", 'id'),
       m("td", 'command'),
       m("td", 'response')
     ])
@@ -139,12 +156,11 @@ window.addEventListener('load', function() {
   client.onmessage = function(e) {
     if (typeof e.data === 'string') {
       var o = JSON.parse(e.data);
+      console.dir(o);
 
       if (o.message === 'jobdone') {
-        console.log('jobdone');
         jobsctrl.add(o);
       } else if (o.message === 'commanddone') {
-        console.log('commanddone');
         cmdctrl.add(o);
       } else {
         throw new Error('unknown message ' + o.message);

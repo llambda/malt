@@ -53,6 +53,8 @@ function updateBrowsers(command) {
         var o = {};
         o.message = 'commanddone';
         o.response = command.value;
+        o.error = command.error;
+        o.errorstack = command.errorstack;
         o.id = command.id;
         o.command = command.command;
         debugger;
@@ -105,16 +107,28 @@ function runCommandOnAllMinions2(command /* command name :String */, args) {
     commandO.args = []; // todo.
 
     return Promise.all(minions.map(function (minion) {
-        var job = runRemotely(minion, command, args);
-        commandO.jobs.push(job);
-        job.promise.then(function () {
-            jobDone(job);
+        return Promise.try(function () {
+            var job = runRemotely(minion, command, args);
+            commandO.jobs.push(job);
+            job.promise.then(function () {
+                jobDone(job);
+            });
+            return job.promise;
         });
-        return job.promise;
     }))
     .then(function (value) {
         commandO.value = value;
         updateBrowsers(commandO);
+
+        return commandO;
+    })
+    .catch(function (error) {
+        debugger;
+        commandO.error = error.message;
+        commandO.errorstack = error.stack;
+        updateBrowsers(commandO);
+
+        return commandO;
     })
 }
 
@@ -139,6 +153,9 @@ function runRemotely(connection, command, args) {
     job.message = 'newjob';
     job.id = JOB;
     job.command = command;
+    if(!commands[command]) {
+        throw new Error('no command ' + command);
+    }
     job.script = commands[command].toString();
     job.args = args;
 
