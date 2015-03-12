@@ -22,13 +22,14 @@ const QUEUED_JOBS = [];
 
 client.on('connect', function(connection) {
 
-    function sendResponse(id, value, error) {
+    function sendResponse(id, value, error, errorstack) {
         if (connection.connected) {
             let send = {};
             send.message = 'jobdone';
             send.id = id;
             send.value = value;
             send.error = error;
+            send.errorstack = errorstack;
 
             console.log('Sending response ' + JSON.stringify(send));
             connection.sendUTF(JSON.stringify(send));            
@@ -36,7 +37,8 @@ client.on('connect', function(connection) {
             QUEUED_JOBS.push({
                id: id,
                value: value,
-               error: error 
+               error: error,
+               errorstack: errorstack 
            })
         }
     }
@@ -64,15 +66,15 @@ client.on('connect', function(connection) {
 
                 let fun = fntools.s2f(command.script);
 
+                debugger;
                 Promise.try(function () {
-                    return vm.runInContext(
-                        fntools.apply2s(fun, command.args)
-                        , DefaultSandbox);
+                    return vm.runInContext(fntools.apply2s(fun, command.args), DefaultSandbox);
                 })
                 .then(function (value) {
                     sendResponse(id, value);
-                }, function (error) {
-                    sendResponse(id, null, error);
+                })
+                .catch(function (error) {
+                    sendResponse(id, null, error.message, error.stack);
                 })
             } else {
                 throw new Error("unknown command");

@@ -4,6 +4,7 @@ let Promise = module.exports.Promise = require('bluebird');
 module.exports = function() {
 
 	return {
+		console: console,
 		require: require,
 		os: require('os'),
 		dns: require('dns'),

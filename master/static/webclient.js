@@ -64,16 +64,7 @@ commands.controller = function() {
   }
 
   this.add = function (commands) {
-
     this.commands.unshift(commands);
-
-    // this.commands = this.commands.sort(function (a, b) {
-    //   return b.id - a.id;
-    // })
-
-    // if (this.jobs.length > 3) {
-    //   this.jobs = this.jobs.slice(0, 3);
-    // }
   }
 
   this.command = function(command, event) {
@@ -85,7 +76,7 @@ commands.controller = function() {
     client.send(JSON.stringify(o));
   }
 
-  this.customRun = m.prop('slowrandom');
+  this.customRun = m.prop('ping');
 
   this.run = function() {
     this.command(this.customRun());
@@ -147,26 +138,29 @@ function displayCommandHeader() {
 var client;
 
 window.addEventListener('load', function() {
-  var cmdctrl =  m.module(document.getElementById('commands'), {controller: commands.controller, view: commands.view});
+  var cmdctrl =  m.module(document.getElementById('commands'), commands);
   var jobsctrl = m.module(document.getElementById('jobs'), jobs);
 
   var W3CWebSocket = require('websocket').w3cwebsocket;
   client = new W3CWebSocket('ws://' + location.host, 'command');
 
   client.onmessage = function(e) {
-    if (typeof e.data === 'string') {
-      var o = JSON.parse(e.data);
-      console.dir(o);
+    try {
+      m.startComputation();
+      if (typeof e.data === 'string') {
+        var o = JSON.parse(e.data);
+        console.dir(o);
 
-      if (o.message === 'jobdone') {
-        jobsctrl.add(o);
-      } else if (o.message === 'commanddone') {
-        cmdctrl.add(o);
-      } else {
-        throw new Error('unknown message ' + o.message);
+        if (o.message === 'jobdone') {
+          jobsctrl.add(o);
+        } else if (o.message === 'commanddone') {
+          cmdctrl.add(o);
+        } else {
+          throw new Error('unknown message ' + o.message);
+        }
       }
-
-      m.redraw();
+    } finally {
+      m.endComputation();
     }
   };
 

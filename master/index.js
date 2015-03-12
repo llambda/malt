@@ -4,7 +4,7 @@ const Promise = require('bluebird');
 const WebSocketServer = require('websocket').server;
 const http = require('http');
 const mime = require('mime-types')
-const commands = require('./commands');
+const commands = require('./commands2');
 const express = require('express');
 const _ = require('lodash');
 const uuid = require('node-uuid');
@@ -48,7 +48,6 @@ const browsers = [];
  
 
 function updateBrowsers(command) {
-    // debugger;
     browsers.map(function (connection) {
         var o = {};
         o.message = 'commanddone';
@@ -57,7 +56,6 @@ function updateBrowsers(command) {
         o.errorstack = command.errorstack;
         o.id = command.id;
         o.command = command.command;
-        debugger;
         connection.sendUTF(JSON.stringify(o));
     })
 
@@ -71,8 +69,8 @@ function updateBrowsers(command) {
 // }
 
 function jobDone(job) {
-    if (!job.promise.isFulfilled()) {
-        throw new Error("Promise must be fullfilled.");
+    if (job.promise.isPending()) {
+        throw new Error("Job's promise must not be pending.");
     }
     var o = {};
     o.message = 'jobdone';
@@ -80,83 +78,74 @@ function jobDone(job) {
     o.command = job.command;
     // o.minion = minion;
 
-    if (job.promise.isRejected())
+    if (job.promise.isRejected()) // promise failed
         o.error = job.promise.reason();
     else 
-        o.value = job.promise.value();
+        o.value = job.promise.value(); // promise succeeded
 
     browsers.map(function (connection) {
         connection.sendUTF(JSON.stringify(o));
     })
 }
 
-// dont use anymore
-function runCommandOnAllMinions(command, args) {
-    return Promise.all(minions.map(function (minion) {
-        return runRemotely(minion, command, args).promise;
-    }))
-    .then(updateBrowsers)
-}
-
-// command is a command name (string)
-function runCommandOnAllMinions2(command /* command name :String */, args) {
-    var commandO = {};
-    commandO.id = uuid.v1();
-    commandO.jobs = [];
-    commandO.command = command;
-    commandO.args = []; // todo.
+// fn is a command function,
+// e.g. a function that takes a runRemotely function
+function runFunctionOnAllMinions(fn, args) {
+    var command = {};
+    command.id = uuid.v1();
+    command.jobs = [];
+    command.command = fn.name ? fn.name : fn.toString();
+    command.args = args;
 
     return Promise.all(minions.map(function (minion) {
-        return Promise.try(function () {
-            var job = runRemotely(minion, command, args);
-            commandO.jobs.push(job);
-            job.promise.then(function () {
-                jobDone(job);
-            });
-            return job.promise;
-        });
+        return fn(newMinionJobRunner(minion, command));
     }))
     .then(function (value) {
-        commandO.value = value;
-        updateBrowsers(commandO);
+        command.value = value;
+        updateBrowsers(command);
 
-        return commandO;
+        return command;
     })
     .catch(function (error) {
-        debugger;
-        commandO.error = error.message;
-        commandO.errorstack = error.stack;
-        updateBrowsers(commandO);
+        command.error = error.message;
+        command.errorstack = error.stack;
+        updateBrowsers(command);
 
-        return commandO;
+        return command;
     })
 }
 
-// setInterval(function () {
-//     runCommandOnAllMinions2(commands.osinfo, ['yahoo.com'])
-//     // .then(console.log)
-// }, 1000);
+function newMinionJobRunner(minionConnection, command) {
+    return function runRemotely(fn, args) {
+        return Promise.try(function () {
+            var job = startRemoteJob(minionConnection, fn, args);
+            command.jobs.push(job);
+            job.promise.then(function () {
+                jobDone(job);
+            })
+            .catch(function () {
+                jobDone(job);
+            })
+            return job.promise;
+        });
+    }
+}
 
-/**
- * Takes as minion.
- * Returns a function that takes a command string that will run on that minion.
- */
-function runRemotely(connection, command, args) {
-    // if (typeof fn !== 'function') {
-    //     debugger;
-    //     throw new TypeError('I need a Function!');
-    // }
+function startRemoteJob(connection, fn, args) {
+    if (typeof fn !== 'function') {
+        throw new TypeError('I need a Function!');
+    }
     
     JOB++;
 
     let job = {};
     job.message = 'newjob';
     job.id = JOB;
-    job.command = command;
-    if(!commands[command]) {
-        throw new Error('no command ' + command);
-    }
-    job.script = commands[command].toString();
+    // job.command = command;
+    // if(!commands[command]) {
+    //     throw new Error('no command ' + command);
+    // }
+    job.script = fn.toString();
     job.args = args;
 
     connection.sendUTF(JSON.stringify(job));
@@ -191,9 +180,8 @@ wsServer.on('request', function(request) {
 
             var o = JSON.parse(message.utf8Data);
 
-            // debugger;
             if (o.message === 'newcommand') {
-                runCommandOnAllMinions2(o.command, o.arguments);
+                runFunctionOnAllMinions(commands[o.command], o.arguments);
             } else {
                 console.log('unknown command received');
             }
