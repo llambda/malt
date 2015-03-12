@@ -106,22 +106,19 @@ function runFunctionOnAllMinions(fn, args) {
         return pfn(newMinionJobRunner(minion, command), args);
     }))
     .then(function (value) {
-        console.log('**** derp ***** ')
-        console.log(command);
-        console.log(value);
-        console.log('**** derp ***** ')
         command.value = value;
         updateBrowsers(command);
-
         return command;
     })
     .catch(function (error) {
-            console.log(command);
+        if (error.message) {
+            command.error = error.message;
+            command.errorstack = error.stack;
+        } else {
+            command.error = error;
+        }
 
-        command.error = error.message;
-        command.errorstack = error.stack;
         updateBrowsers(command);
-
         return command;
     })
 }

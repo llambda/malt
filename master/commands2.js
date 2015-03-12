@@ -3,6 +3,13 @@
 // which it remotely executes on the minion, and returns a promise. 
 // This allows a mix of local and remote code.
 
+module.exports.throw = function (runRemotely, args) {
+	this.name = 'throw';
+
+	return runRemotely(function () {
+		throw new Error('I am supposed to throw this error.');
+	});
+}
 
 module.exports.ping = function (runRemotely, args) {
 	this.name = 'ping';
