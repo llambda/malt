@@ -3,6 +3,15 @@
 // which it remotely executes on the minion, and returns a promise. 
 // This allows a mix of local and remote code.
 
+module.exports.randomjs = function (runRemotely, args) {
+	this.name = 'randomjs';
+
+	return runRemotely(function () {
+		var random = require("random-js")(); // uses the nativeMath engine
+		return random.integer(1, 100);
+	});
+}
+
 module.exports.throw = function (runRemotely, args) {
 	this.name = 'throw';
 
