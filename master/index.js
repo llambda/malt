@@ -13,7 +13,7 @@ const app = express();
 app.use(express.static(__dirname + '/static'));
 
 const server = http.createServer(app).listen(7770, function() {
-    console.log((new Date()) + ' Server is listening on port 7770');
+    console.log((new Date()) + ' Malt master is listening on port 7770');
 });
 
 // https://www.npmjs.com/package/websocket
@@ -169,7 +169,6 @@ function startRemoteJob(connection, fn, args) {
 }
 
 wsServer.on('request', function(request) {
-    // console.log(request.httpRequest);
 
     if (!originIsAllowed(request.origin)) {
       // Make sure we only accept requests from an allowed origin
@@ -184,19 +183,12 @@ wsServer.on('request', function(request) {
         browsers.push(connection);
 
         connection.on('message', function (message) {
-          console.log((new Date()) + ' ' + JSON.stringify(message) + ' command message received.');
-
             var o = JSON.parse(message.utf8Data);
-
-            if (o.message === 'newcommand') {
+            if (o.message === 'newcommand' && o.command && commands[o.command]) {
                 runFunctionOnAllMinions(commands[o.command], o.arguments);
             } else {
-                console.log('unknown command received');
+                console.error('Unknown command received');
             }
-          
-          // if (message.utf8Data === 'refresh') {
-          //   console.log('REFRESHAHHH');
-          // }
         })
 
         connection.on('close', function (reasonCode, description) {
@@ -208,9 +200,8 @@ wsServer.on('request', function(request) {
     }
 
     let connection = request.accept('minion', request.origin);
-
     minions.push(connection);
-
+    
     connection.on('message', function (message) {
         console.log((new Date()) + ' minion connection accepted.');
 
