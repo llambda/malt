@@ -3,19 +3,14 @@
 const Promise = require('bluebird');
 const WebSocketClient = require('websocket').client;
 const vm = require('vm');
-const os = Promise.promisifyAll(require('os'));
-const dns = Promise.promisifyAll(require('dns'));
-const npm = require('npm');
 const fntools = require('function-serialization-tools')
-
 const client = new WebSocketClient();
-
 const DefaultSandbox = require('./sandboxes/default')();
 
 vm.createContext(DefaultSandbox);
 
 client.on('connectFailed', function(error) {
-    console.log('Connect Error: ' + error.toString());
+    console.log('Connection failed: ' + error.toString());
 });
 
 const QUEUED_JOBS = [];
@@ -31,7 +26,6 @@ client.on('connect', function(connection) {
             send.error = error;
             send.errorstack = errorstack;
 
-            console.log('Sending response ' + JSON.stringify(send));
             connection.sendUTF(JSON.stringify(send));            
         } else {
             QUEUED_JOBS.push({
@@ -47,25 +41,21 @@ client.on('connect', function(connection) {
         sendResponse(job.id, job, value, job.error);
     });
 
-    console.log('WebSocket Client Connected');
+    console.log('Connected to master.');
     connection.on('error', function(error) {
-        console.log("Connection Error: " + error.toString());
+        console.error("Connection error: " + error.toString());
     });
     connection.on('close', function() {
-        console.log('Connection Closed');
+        console.error('Connection closed');
         connect();
     });
     connection.on('message', function(message) {
         if (message.type === 'utf8') {
-            console.log("Received: '" + message.utf8Data + "'");
-
             let command = JSON.parse(message.utf8Data);
 
             if (command.message === 'newjob') {
                 let id = command.id;
-
                 let fun = fntools.s2f(command.script);
-
                 Promise.try(function () {
                     return vm.runInContext(fntools.apply2s(fun, command.args), DefaultSandbox);
                 })
@@ -76,8 +66,10 @@ client.on('connect', function(connection) {
                     sendResponse(id, null, error.message, error.stack);
                 })
             } else {
-                throw new Error("unknown command");
+                console.error('Unknown command ' + message);
             }
+        } else {
+            console.error('Expected a UTF8 command ' + message);
         }
     });
 });
