@@ -35,6 +35,7 @@ function originIsAllowed(origin) {
 }
 
 let JOB = 0;
+let COMMAND = 0;
 const JOBS = [];
 
 const minions = [];
@@ -95,7 +96,8 @@ function jobDone(job) {
 // e.g. a function that takes a runRemotely function
 function runFunctionOnAllMinions(fn, args) {
     var command = {};
-    command.id = uuid.v1();
+    // command.id = uuid.v1();
+    command.id = COMMAND++;
     command.jobs = [];
     command.command = fn.name ? fn.name : fn.toString();
     command.args = args;

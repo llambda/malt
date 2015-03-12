@@ -63,6 +63,7 @@ client.on('connect', function(connection) {
                     sendResponse(id, value);
                 })
                 .catch(function (error) {
+                    debugger;
                     sendResponse(id, null, error.message, error.stack);
                 })
             } else {
