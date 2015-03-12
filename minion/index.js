@@ -66,7 +66,6 @@ client.on('connect', function(connection) {
 
                 let fun = fntools.s2f(command.script);
 
-                debugger;
                 Promise.try(function () {
                     return vm.runInContext(fntools.apply2s(fun, command.args), DefaultSandbox);
                 })
