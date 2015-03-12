@@ -1,27 +1,31 @@
-// new command format.
-// runRemotely is a function that takes 1 argument, a function,
-// which it remotely executes on the minion, and returns a promise. 
-// This allows a mix of local and remote code.
 
-module.exports.randomjs = function (runRemotely, args) {
+/**
+ * Commands are functions that can be executed on the master as well as minions.
+ * @param rr :Function . Executes function on the minion.
+ * @param arguments :Array. Arguments given to the command by the user.
+ */ 
+module.exports.randomjs = function (rr, args) {
+	// Here we are executing in the master.
 	this.name = 'randomjs';
 
-	return runRemotely(function (args) {
-		console.log('args are: ' + args);
-		var random = require("random-js")(); // uses the nativeMath engine
-		return random.integer(1, 100);
-	}, args);
+	return rr( // rr = remoteRunner
+		function (args) { // This function executes in the minions.
+			console.log('args are: ' + args);
+			var random = require("random-js")(); // uses autoload to load the module.
+			return random.integer(1, 100);
+		}
+	, args);
 }
 
-module.exports.throw = function (runRemotely, args) {
+module.exports.throw = function (rr, args) {
 	this.name = 'throw';
 
-	return runRemotely(function () {
+	return rr(function () {
 		throw new Error('I am supposed to throw this error.');
 	});
 }
 
-module.exports.ping = function (runRemotely, args) {
+module.exports.ping = function (rr, args) {
 	this.name = 'ping';
 
 	var rrandom = function () {
@@ -31,7 +35,7 @@ module.exports.ping = function (runRemotely, args) {
 
 	var startTime = process.hrtime();
 
-	return runRemotely(rrandom).then(function (val) {
+	return rr(rrandom).then(function (val) {
 
 		var endTime = process.hrtime();
 		console.log('hi');
@@ -40,7 +44,7 @@ module.exports.ping = function (runRemotely, args) {
 	})
 }
 
-module.exports.slowping = function (runRemotely, args) {
+module.exports.slowping = function (rr, args) {
 	this.name = 'slowping';
 
 	var rrandom = function () {
@@ -52,7 +56,7 @@ module.exports.slowping = function (runRemotely, args) {
 	};
 
 	var startTime = process.hrtime();
-	return runRemotely(rrandom)
+	return rr(rrandom)
 	.then(function () {
 		var endTime = process.hrtime();
 		return [endTime[0] - startTime[0], endTime[1] - startTime[1]]
