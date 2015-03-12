@@ -107,22 +107,32 @@ function runFunctionOnAllMinions(fn, args) {
         // var x = pfn(newMinionJobRunner(minion, command), args);
         return pfn(newMinionJobRunner(minion, command), args);
     }))
-    .then(function (value) {
-        command.value = value;
-        updateBrowsers(command);
-        return command;
-    })
-    .catch(function (error) {
-        if (error.message) {
-            command.error = error.message;
-            command.errorstack = error.stack;
+    .reflect()
+    .then(function (promiseInspection) {
+        if (promiseInspection.isFulfilled()) {
+            command.value = promiseInspection.value();     
         } else {
-            command.error = error;
+            command.error = promiseInspection.error().toString();
         }
-
         updateBrowsers(command);
         return command;
     })
+    // .then(function (value) {
+    //     command.value = value;
+    //     updateBrowsers(command);
+    //     return command;
+    // })
+    // .catch(function (error) {
+    //     if (error.message) {
+    //         command.error = error.message;
+    //         command.errorstack = error.stack;
+    //     } else {
+    //         command.error = error;
+    //     }
+
+    //     updateBrowsers(command);
+    //     return command;
+    // })
 }
 
 function newMinionJobRunner(minionConnection, command) {

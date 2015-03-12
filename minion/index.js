@@ -59,12 +59,14 @@ client.on('connect', function(connection) {
                 Promise.try(function () {
                     return vm.runInContext(fntools.apply2s(fun, command.args), DefaultSandbox);
                 })
-                .then(function (value) {
-                    sendResponse(id, value);
-                })
-                .catch(function (error) {
-                    debugger;
-                    sendResponse(id, null, error.message, error.stack);
+                .reflect()
+                .then(function (promiseInspection) {
+                    if (promiseInspection.isFulfilled()) {
+                        console.log(promiseInspection)
+                        sendResponse(id, promiseInspection.value());
+                    } else {
+                        sendResponse(id, null, promiseInspection.error().toString(), null);
+                    }
                 })
             } else {
                 console.error('Unknown command ' + message);

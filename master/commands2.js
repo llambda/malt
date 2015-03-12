@@ -6,10 +6,11 @@
 module.exports.randomjs = function (runRemotely, args) {
 	this.name = 'randomjs';
 
-	return runRemotely(function () {
+	return runRemotely(function (args) {
+		console.log('args are: ' + args);
 		var random = require("random-js")(); // uses the nativeMath engine
 		return random.integer(1, 100);
-	});
+	}, args);
 }
 
 module.exports.throw = function (runRemotely, args) {
