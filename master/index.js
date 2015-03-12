@@ -78,10 +78,11 @@ function jobDone(job) {
     o.command = job.command;
     // o.minion = minion;
 
-    if (job.promise.isRejected()) // promise failed
+    if (job.promise.isRejected()) { // promise failed
         o.error = job.promise.reason();
-    else 
+    } else { 
         o.value = job.promise.value(); // promise succeeded
+    }
 
     browsers.map(function (connection) {
         connection.sendUTF(JSON.stringify(o));
@@ -91,6 +92,7 @@ function jobDone(job) {
 // fn is a command function,
 // e.g. a function that takes a runRemotely function
 function runFunctionOnAllMinions(fn, args) {
+    debugger;
     var command = {};
     command.id = uuid.v1();
     command.jobs = [];

@@ -5,6 +5,8 @@
 
 
 module.exports.ping = function (runRemotely, args) {
+	this.name = 'ping';
+
 	var rrandom = function () {
 		console.log('hi');
 		return Math.random();
@@ -20,4 +22,25 @@ module.exports.ping = function (runRemotely, args) {
 	})
 }
 
-module.exports.ping.name = 'ping'
+module.exports.slowping = function (runRemotely, args) {
+	this.name = 'slowping';
+
+	var rrandom = function () {
+		var Promise = require('bluebird');
+
+    	var rando = Math.trunc(Math.random() * 4000);
+
+    	return Promise.delay(rando).then(function () {
+     	   return rando;
+    	})
+	};
+
+	var startTime = process.hrtime();
+	return runRemotely(rrandom)
+	.then(function () {
+		var endTime = process.hrtime();
+		console.log('hi');
+
+		return endTime - startTime;
+	})
+}
