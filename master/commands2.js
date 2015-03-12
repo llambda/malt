@@ -4,14 +4,6 @@
 // This allows a mix of local and remote code.
 
 
-// module.exports.ping = function (runRemotely, args) {
-// 	debugger;
-// 	this.name = 'ping';
-
-// 	return 'hi'
-// }
-
-
 module.exports.ping = function (runRemotely, args) {
 	this.name = 'ping';
 
@@ -36,9 +28,7 @@ module.exports.slowping = function (runRemotely, args) {
 
 	var rrandom = function () {
 		var Promise = require('bluebird');
-
     	var rando = Math.trunc(Math.random() * 4000);
-
     	return Promise.delay(rando).then(function () {
      	   return rando;
     	})
@@ -48,9 +38,6 @@ module.exports.slowping = function (runRemotely, args) {
 	return runRemotely(rrandom)
 	.then(function () {
 		var endTime = process.hrtime();
-		var result = endTime - startTime
-		console.log('hi ' + result);
-
-		return result;
+		return [endTime[0] - startTime[0], endTime[1] - startTime[1]]
 	})
 }
