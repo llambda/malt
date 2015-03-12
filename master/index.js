@@ -30,7 +30,6 @@ const wsServer = new WebSocketServer({
 });
 
 function originIsAllowed(origin) {
-  // put logic here to detect whether the specified origin is allowed.
   return true;
 }
 
@@ -40,13 +39,6 @@ const JOBS = [];
 
 const minions = [];
 const browsers = [];
-
-// setInterval(function () {
-//     console.log('JOB# ' + JOB);
-//     if (minions.length > 0)
-//         console.log('# of connected minions ' + minions.length);
-// }, 5000);
- 
 
 function updateBrowsers(command) {
     browsers.map(function (connection) {
@@ -62,12 +54,6 @@ function updateBrowsers(command) {
 
     return command;
 }
-
-// function updateBrowsers(data) {
-//     browsers.map(function (connection) {
-//         connection.sendUTF(JSON.stringify(data));
-//     })
-// }
 
 function jobDone(job) {
     if (job.promise.isPending()) {
@@ -104,7 +90,6 @@ function runFunctionOnAllMinions(fn, args) {
 
     return Promise.all(minions.map(function (minion) {
         var pfn = Promise.method(fn);
-        // var x = pfn(newMinionJobRunner(minion, command), args);
         return pfn(newMinionJobRunner(minion, command), args);
     }))
     .reflect()
@@ -117,22 +102,6 @@ function runFunctionOnAllMinions(fn, args) {
         updateBrowsers(command);
         return command;
     })
-    // .then(function (value) {
-    //     command.value = value;
-    //     updateBrowsers(command);
-    //     return command;
-    // })
-    // .catch(function (error) {
-    //     if (error.message) {
-    //         command.error = error.message;
-    //         command.errorstack = error.stack;
-    //     } else {
-    //         command.error = error;
-    //     }
-
-    //     updateBrowsers(command);
-    //     return command;
-    // })
 }
 
 function newMinionJobRunner(minionConnection, command) {
@@ -161,10 +130,6 @@ function startRemoteJob(connection, fn, args) {
     let job = {};
     job.message = 'newjob';
     job.id = JOB;
-    // job.command = command;
-    // if(!commands[command]) {
-    //     throw new Error('no command ' + command);
-    // }
     job.script = fn.toString();
     job.args = args;
 
