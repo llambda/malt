@@ -50,12 +50,12 @@ const browsers = [];
 function updateBrowsers(command) {
     browsers.map(function (connection) {
         var o = {};
+        o.command = command.name;
         o.message = 'commanddone';
         o.response = command.value;
         o.error = command.error;
         o.errorstack = command.errorstack;
         o.id = command.id;
-        o.command = command.command;
         connection.sendUTF(JSON.stringify(o));
     })
 
@@ -87,12 +87,13 @@ function jobDone(job) {
     browsers.map(function (connection) {
         connection.sendUTF(JSON.stringify(o));
     })
+
+    return job.promise;
 }
 
 // fn is a command function,
 // e.g. a function that takes a runRemotely function
 function runFunctionOnAllMinions(fn, args) {
-    debugger;
     var command = {};
     command.id = uuid.v1();
     command.jobs = [];
@@ -100,15 +101,23 @@ function runFunctionOnAllMinions(fn, args) {
     command.args = args;
 
     return Promise.all(minions.map(function (minion) {
-        return fn(newMinionJobRunner(minion, command));
+        var pfn = Promise.method(fn);
+        // var x = pfn(newMinionJobRunner(minion, command), args);
+        return pfn(newMinionJobRunner(minion, command), args);
     }))
     .then(function (value) {
+        console.log('**** derp ***** ')
+        console.log(command);
+        console.log(value);
+        console.log('**** derp ***** ')
         command.value = value;
         updateBrowsers(command);
 
         return command;
     })
     .catch(function (error) {
+            console.log(command);
+
         command.error = error.message;
         command.errorstack = error.stack;
         updateBrowsers(command);
@@ -122,13 +131,13 @@ function newMinionJobRunner(minionConnection, command) {
         return Promise.try(function () {
             var job = startRemoteJob(minionConnection, fn, args);
             command.jobs.push(job);
-            job.promise.then(function () {
+            return job.promise.then(function () {
                 jobDone(job);
-            })
-            .catch(function () {
+                return job.promise;
+            }, function () {
                 jobDone(job);
+                return job.promise;
             })
-            return job.promise;
         });
     }
 }
