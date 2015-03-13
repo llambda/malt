@@ -7,6 +7,7 @@ let Promise = module.exports.Promise = require('bluebird');
 module.exports = function() {
 
 	return {
+		Promise: require('bluebird');
 		autoinstall: require('autoinstall'),
 		console: console,
 		require: require,

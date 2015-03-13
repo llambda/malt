@@ -181,9 +181,16 @@ function displayCommandHeader() {
 
 var client;
 
-window.addEventListener('load', function() {
+window.addEventListener('load', loaded);
+
+function loaded() {
   var cmdctrl =  m.module(document.getElementById('commands'), commands);
   var jobsctrl = m.module(document.getElementById('jobs'), jobs);
+
+  connect(cmdctrl, jobsctrl);
+}
+
+function connect(cmdctrl, jobsctrl) {
 
   var W3CWebSocket = require('websocket').w3cwebsocket;
   client = new W3CWebSocket('ws://' + location.host, 'command');
@@ -208,7 +215,6 @@ window.addEventListener('load', function() {
     }
   };
 
-
   client.onerror = function() {
     console.log('Connection Error');
   };
@@ -219,6 +225,8 @@ window.addEventListener('load', function() {
 
   client.onclose = function() {
     console.log('Web Client Closed');
+    setTimeout(function () {
+      connect(cmdctrl, jobsctrl)
+    }, 3000);
   };
-
-});
+}
