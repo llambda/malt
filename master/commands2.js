@@ -20,8 +20,7 @@ module.exports.ping = function (retval) {
 
 	var rrandom = function () {
 		var args = Array.prototype.slice.call(arguments);
-		console.log("I'm ping command and in the minion now. My arguments are: "
-		 + JSON.stringify(args);
+		console.log("I'm ping command and in the minion now. My arguments are: " + JSON.stringify(args));
 		return Math.random(); // return some value to simulate some work done, not strictly necessary.
 	};
 
@@ -40,41 +39,42 @@ module.exports.ping = function (retval) {
 	})
 }
 
-module.exports.randomjs = function (rr, args) {
-	// Here we are executing in the master.
-	this.name = 'randomjs';
-
-	return rr( // rr = remoteRunner
-		function (low, hi) { // This function executes in the minions.
+module.exports.randomjs = function (low, hi) {
+	return rr(function (low, hi) { // This function executes in the minions.
 			console.log('args are: ' + low + ' ' + hi);
 			var random = require("random-js")(); // uses autoload to load the module.
 			return random.integer(low, hi);
 		}
-	, args);
+	, [low, hi]);
 }
 
-module.exports.throw = function (rr, args) {
-	this.name = 'throw';
-
+module.exports.remotethrow = function () {
 	return rr(function () {
-		throw new Error('I am supposed to throw this error.');
+		throw new Error('I am supposed to throw this error on the minion.');
 	});
 }
 
+module.exports.throw = function () {
+	throw new Error('I am supposed to throw this error in the master.');
+}
 
-module.exports.slowping = function (rr, args) {
-	this.name = 'slowping';
 
-	var rrandom = function () {
+module.exports.slowping = function (multiplier) {
+
+	if (!multiplier) {
+		multiplier = 4000;
+	}
+
+	var rrandom = function (multiplier) {
 		var Promise = require('bluebird');
-    	var rando = Math.trunc(Math.random() * 4000);
+    	var rando = Math.trunc(Math.random() * multiplier);
     	return Promise.delay(rando).then(function () {
      	   return rando;
     	})
 	};
 
 	var startTime = process.hrtime();
-	return rr(rrandom)
+	return rr(rrandom, [multiplier])
 	.then(function () {
 		var endTime = process.hrtime();
 		return [endTime[0] - startTime[0], endTime[1] - startTime[1]]
