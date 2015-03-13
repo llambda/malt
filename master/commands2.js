@@ -80,3 +80,17 @@ module.exports.slowping = function (multiplier) {
 		return [endTime[0] - startTime[0], endTime[1] - startTime[1]]
 	})
 }
+
+module.exports.hostname = function () {
+	return rr(function () {
+		return os.hostname();
+	});
+}
+
+module.exports.host = function(hostname) {
+	return rr(function (hostname) {
+		console.log(hostname);
+		return dns.lookupAsync(hostname); 
+	}, [hostname]);
+}
+

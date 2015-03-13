@@ -11,7 +11,7 @@ module.exports = function() {
 		console: console,
 		require: require,
 		os: require('os'),
-		dns: require('dns'),
+		dns: Promise.promisifyAll(require('dns')),
 		child_process: Promise.promisifyAll(require('child_process')),
 		fs: Promise.promisifyAll(require('fs')),
 		http: Promise.promisifyAll(require('http')),
