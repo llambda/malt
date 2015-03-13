@@ -39,7 +39,7 @@ module.exports.ping = function (retval) {
 	})
 }
 
-module.exports.randomjs = function (low, hi) {
+module.exports.random = function (low, hi) {
 	return rr(function (low, hi) { // This function executes in the minions.
 			console.log('args are: ' + low + ' ' + hi);
 			var random = require("random-js")(); // uses autoload to load the module.
@@ -48,7 +48,7 @@ module.exports.randomjs = function (low, hi) {
 	, [low, hi]);
 }
 
-module.exports.remotethrow = function () {
+module.exports.rthrow = function () {
 	return rr(function () {
 		throw new Error('I am supposed to throw this error on the minion.');
 	});
@@ -94,3 +94,32 @@ module.exports.host = function(hostname) {
 	}, [hostname]);
 }
 
+module.exports.uptime = function () {
+	return rr(function() {
+	    var os = require('os');
+	    return os.uptime();
+	})
+}
+
+module.exports.osinfo = function (specific) {
+
+	return rr(function(specific) {
+	    var os = require('os');
+
+	    if (specific) {
+	    	return os[specific]();
+	    } else return {
+	        'hostname': os.hostname(),
+	        'type': os.type(),
+	        'platform': os.platform(),
+	        'arch': os.arch(),
+	        'release': os.release(),
+	        'uptime': os.uptime(),
+	        'loadavg': os.loadavg(),
+	        'totalmem': os.totalmem(),
+	        'freemem': os.freemem(),
+	        'cpus': os.cpus(),
+	        'networkInterfaces': os.networkInterfaces()
+	    }
+	}, [specific]);
+};
