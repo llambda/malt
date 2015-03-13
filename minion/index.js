@@ -5,7 +5,7 @@ const WebSocketClient = require('websocket').client;
 const vm = require('vm');
 const fntools = require('function-serialization-tools')
 const client = new WebSocketClient();
-const DefaultSandbox = require('./sandboxes/default')();
+const DefaultSandbox = require('../sandboxes/permissive')();
 
 vm.createContext(DefaultSandbox);
 

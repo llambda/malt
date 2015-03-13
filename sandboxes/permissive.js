@@ -1,6 +1,9 @@
 'use strict';
 let Promise = module.exports.Promise = require('bluebird');
 
+/**
+ * Perissive sandbox, intended to allow a master to fully control a minion.
+ */
 module.exports = function() {
 
 	return {

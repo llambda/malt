@@ -8,6 +8,8 @@ const commands = require('./commands2');
 const express = require('express');
 const _ = require('lodash');
 const uuid = require('node-uuid');
+const vm = require('vm');
+const fntools = require('function-serialization-tools')
 
 const app = express();
 app.use(express.static(__dirname + '/static'));
@@ -89,8 +91,20 @@ function runFunctionOnAllMinions(fn, args) {
     command.args = args;
 
     return Promise.all(minions.map(function (minion) {
-        var pfn = Promise.method(fn);
-        return pfn(newMinionJobRunner(minion, command), args);
+        // Non-sandbox way:
+        // return pfn(newMinionJobRunner(minion, command), args);
+
+        // Sandbox way: (for a little bit of protection)
+        var sandbox = require('../sandboxes/restricted.js')();
+        vm.createContext(sandbox);
+
+        sandbox.rr = newMinionJobRunner(minion, command);
+        sandbox.args = args;
+        // return vm.runInContext('this.fn()(runner, args)', sandbox);
+        // fntools.apply2s(fun, command.args), DefaultSandbox
+        return Promise.try(function () {
+            return vm.runInContext(fntools.apply2s(fn, args), sandbox);
+        });
     }))
     .reflect()
     .then(function (promiseInspection) {
@@ -109,13 +123,10 @@ function newMinionJobRunner(minionConnection, command) {
         return Promise.try(function () {
             var job = startRemoteJob(minionConnection, fn, args);
             command.jobs.push(job);
-            return job.promise.then(function () {
+            return job.promise.reflect().then(function () {
                 jobDone(job);
                 return job.promise;
-            }, function () {
-                jobDone(job);
-                return job.promise;
-            })
+            });
         });
     }
 }
@@ -162,7 +173,6 @@ wsServer.on('request', function(request) {
         connection.on('message', function (message) {
             var o = JSON.parse(message.utf8Data);
             if (o.message === 'newcommand' && o.command && commands[o.command]) {
-                debugger;
                 runFunctionOnAllMinions(commands[o.command], o.arguments);
             } else {
                 console.error('Unknown command received');

@@ -1,18 +1,54 @@
 
-/**
- * Commands are functions that can be executed on the master as well as minions.
- * @param rr :Function . Executes function on the minion.
- * @param arguments :Array. Arguments given to the command by the user.
- */ 
+/*
+
+Commands run in a sandbox provided by the master.
+Sandbox provides the global function 'rr' (think remote runner), which is a function that
+takes a function and an array of arguments. The taken function executes remotely on the minion. 
+rr tries to return values as Promises, so they can be composed with operations on the master.
+Commands are functions that are executed both on the master and a minion.
+
+This allows commands to run in a promise chain on both the master and the minion.
+
+*/ 
+
+
+// retval argument - return this instead of timing.
+module.exports.ping = function (retval) {
+	var args = Array.prototype.slice.call(arguments);
+
+	console.log("I'm ping command and on the master now. My arguments are: " + JSON.stringify(args));
+
+	var rrandom = function () {
+		var args = Array.prototype.slice.call(arguments);
+		console.log("I'm ping command and in the minion now. My arguments are: "
+		 + JSON.stringify(args);
+		return Math.random(); // return some value to simulate some work done, not strictly necessary.
+	};
+
+	var startTime = process.hrtime(); // start couting ping time on the master.
+
+	return rr(rrandom, args).then(function (val) {
+
+		var endTime = process.hrtime(); // end couting time it took the minion to run the fn.
+		console.log("I'm ping command on the master, and the minion finished its work.");
+
+		if (retval) {
+			return retval; 
+		} else {
+			return [endTime[0] - startTime[0], endTime[1] - startTime[1]];
+		}
+	})
+}
+
 module.exports.randomjs = function (rr, args) {
 	// Here we are executing in the master.
 	this.name = 'randomjs';
 
 	return rr( // rr = remoteRunner
-		function (args) { // This function executes in the minions.
-			console.log('args are: ' + args);
+		function (low, hi) { // This function executes in the minions.
+			console.log('args are: ' + low + ' ' + hi);
 			var random = require("random-js")(); // uses autoload to load the module.
-			return random.integer(1, 100);
+			return random.integer(low, hi);
 		}
 	, args);
 }
@@ -25,26 +61,6 @@ module.exports.throw = function (rr, args) {
 	});
 }
 
-module.exports.ping = function (rr, args) {
-	this.name = 'ping';
-
-	console.log('Master ping with arguments: ' + JSON.stringify(arguments));
-
-	var rrandom = function (one, two) {
-		console.log('ping with arguments: ' + one + ' ' + two);
-		return Math.random();
-	};
-
-	var startTime = process.hrtime();
-
-	return rr(rrandom, args).then(function (val) {
-
-		var endTime = process.hrtime();
-		console.log('hi');
-
-		return [endTime[0] - startTime[0], endTime[1] - startTime[1]];
-	})
-}
 
 module.exports.slowping = function (rr, args) {
 	this.name = 'slowping';
