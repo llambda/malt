@@ -28,14 +28,16 @@ module.exports.throw = function (rr, args) {
 module.exports.ping = function (rr, args) {
 	this.name = 'ping';
 
-	var rrandom = function () {
-		console.log('hi');
+	console.log('Master ping with arguments: ' + JSON.stringify(arguments));
+
+	var rrandom = function (one, two) {
+		console.log('ping with arguments: ' + one + ' ' + two);
 		return Math.random();
 	};
 
 	var startTime = process.hrtime();
 
-	return rr(rrandom).then(function (val) {
+	return rr(rrandom, args).then(function (val) {
 
 		var endTime = process.hrtime();
 		console.log('hi');

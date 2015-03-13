@@ -162,6 +162,7 @@ wsServer.on('request', function(request) {
         connection.on('message', function (message) {
             var o = JSON.parse(message.utf8Data);
             if (o.message === 'newcommand' && o.command && commands[o.command]) {
+                debugger;
                 runFunctionOnAllMinions(commands[o.command], o.arguments);
             } else {
                 console.error('Unknown command received');
@@ -182,8 +183,8 @@ wsServer.on('request', function(request) {
     connection.on('message', function (message) {
         console.log((new Date()) + ' minion connection accepted.');
 
-        if (message.type === 'utf8') {
-            // console.log('Received Message: ' + message.utf8Data);
+        if (message.type !== 'utf8') {
+            console.error('Error: Received Message not utf8 type: ' + message);
         }
 
         message = JSON.parse(message.utf8Data);

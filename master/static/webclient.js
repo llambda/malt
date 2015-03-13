@@ -28,16 +28,17 @@ jobs.controller = function() {
   }
 }
 
-function renderJobTd(job) {
-  if (!job.error) {
-    return m("td", style.good, JSON.stringify(job.value));
-  } else {
-    return m("td", style.bad,
-      [JSON.stringify(job.error), m("br"), m("br"), job.errorstack]);
-  }
-}
 
 jobs.view = function(ctrl) {
+
+  function renderJobTd(job) {
+    if (!job.error) {
+      return m("td", style.good, JSON.stringify(job.value));
+    } else {
+      return m("td", style.bad,
+        [JSON.stringify(job.error), m("br"), m("br"), job.errorstack]);
+    }
+  }
 
   return m("table",
     style.table,
@@ -56,9 +57,10 @@ jobs.view = function(ctrl) {
 var commands = {};
 commands.controller = function() {
   var id = 0;
+  var self = this;
 
   this.commands = [];
-  this.arguments = [];
+  this.args = [];
 
   this.get = function() {
     return this.commands;
@@ -69,33 +71,33 @@ commands.controller = function() {
   }
 
   this.addArgument = function() {
-    this.arguments.push('');
-  }.bind(this);
+    self.args.push('');
+  };
 
   this.removeArgument = function() {
-    this.arguments.pop();
-  }.bind(this);
+    self.args.pop();
+  };
 
   this.setArgument = function(index) {
     return function(value) {
-      this.arguments[index] = value;
-      console.log(this.arguments);
-    }.bind(this);
-  }.bind(this);
+      self.args[index] = value;
+    }
+  }
 
   this.getArgument = function(index) {
-    return this.arguments[index];
-  }.bind(this);
+    return self.args[index];
+  }
 
   this.getArguments = function() {
-    return this.arguments;
-  }.bind(this);
+    return self.args;
+  }
 
   this.command = function(command, event) {
     console.log(event);
     var o = {};
     o.message = 'newcommand';
     o.command = command;
+    o.arguments = self.args;
     o.id = id++;
     client.send(JSON.stringify(o));
   }
@@ -132,14 +134,15 @@ commands.view = function(controller) {
   m("br"),
   m("button", { onclick: controller.addArgument }, "Add Argument"),
   m("button", { onclick: controller.removeArgument }, "Remove Argument"),
+  m("br"),
 
-  m("button", { onclick: controller.run }, "run"),
+  m("button", { style: {color:'red'}, onclick: controller.run }, "RUN!"),
 
-  m("button", {
-    onclick: function() {
-      controller.command('osinfo');
-    }
-  }, "osinfo command"),
+  // m("button", {
+  //   onclick: function() {
+  //     controller.command('osinfo');
+  //   }
+  // }, "osinfo command"),
   
   m("table", style.table, [
     m("thead", displayCommandHeader()),

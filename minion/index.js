@@ -57,6 +57,8 @@ client.on('connect', function(connection) {
                 let id = command.id;
                 let fun = fntools.s2f(command.script);
                 Promise.try(function () {
+                    console.log('args: ' + command.args);
+                    console.log(fun.toString());
                     return vm.runInContext(fntools.apply2s(fun, command.args), DefaultSandbox);
                 })
                 .reflect()
