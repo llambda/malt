@@ -123,3 +123,13 @@ module.exports.osinfo = function (specific) {
 	    }
 	}, [specific]);
 };
+
+module.exports.ifconfig = function () {
+	return rr(function () {
+		var streamToString = require('stream-to-string')
+	    var spawn = require('child_process').spawn;
+	    var p = spawn('ifconfig');
+	    
+	    return streamToString(p.stdout);
+	});
+}
