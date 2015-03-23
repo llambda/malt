@@ -11,7 +11,7 @@ The master also serves up a web interface, and websocket is used to send message
 
 Commands are simply io.js functions that run sandboxed on the master and the minions. The sandbox contains a remote executor function that allows running code on the minions. Commands can have arguments and run code both remotely on the minions, as well as on the master. Remote code returns promises or values that are automatically converted to promises, which can be combined with promises on the master. This allows maximum parallellism horizontally across minions, as well as vertically within the minion. Remote code runs as jobs which are shown in the web interface.
 
-Remote code Functions are convered to Strings via Function.toString(), sent as a String to the minions, then reconstitued (deserialized) at the other end back into a JavaScript Function.
+Remote code Functions are convered to Strings via Function.toString(), sent as a String to the minions, then reconstitued (deserialized) at the other end back into a JavaScript Function via [function-serialization-tools](https://www.npmjs.com/package/function-serialization-tools).
 
 For example, the ping command is designed to first get the current time on the master, then run a function remotely on the minion that returns any value (which is unused). Then, when that is done, the current time on the master is obtained again, and finally the difference is returned as the command's return value.
 
