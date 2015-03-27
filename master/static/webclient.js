@@ -12,6 +12,28 @@ style.table = {
   }
 }
 
+var bunyan = require('bunyan');
+
+function MyRawStream() {}
+MyRawStream.prototype.write = function (rec) {
+    console.log('[%s] %s: %s',
+        rec.time.toISOString(),
+        bunyan.nameFromLevel[rec.level],
+        rec.msg);
+}
+
+var log = bunyan.createLogger({
+    name: 'webclient',
+    streams: [
+        {
+            level: 'info',
+            stream: new MyRawStream(),
+            type: 'raw'
+        }
+    ]
+});
+
+
 var m = require('mithril');
 // var _ = require('lodash');
 
@@ -116,7 +138,7 @@ commands.controller = function() {
   }
 
   this.command = function(command, event) {
-    console.log(event);
+    log.info(event);
     var o = {};
     o.message = 'newcommand';
     o.command = command;
@@ -224,7 +246,7 @@ function connect(cmdctrl, jobsctrl, msgsctrl) {
       m.startComputation();
       if (typeof e.data === 'string') {
         var o = JSON.parse(e.data);
-        console.dir(o);
+        log.info('message', o);
 
         msgsctrl.add(o);
 
@@ -240,15 +262,15 @@ function connect(cmdctrl, jobsctrl, msgsctrl) {
   };
 
   client.onerror = function() {
-    console.log('Connection Error');
+    log.error('Connection Error');
   };
 
   client.onopen = function() {
-    console.log('WebSocket Client Connected');
+    log.info('WebSocket Client Connected');
   };
 
   client.onclose = function() {
-    console.log('Web Client Closed');
+    log.info('Web Client Closed');
     setTimeout(function () {
       connect(cmdctrl, jobsctrl)
     }, 3000);
