@@ -93,7 +93,7 @@ function runFunctionOnAllMinions(fn, args) {
     command.command = fn.name ? fn.name : fn.toString();
     command.args = args;
 
-    return Promise.all(minions.map(function (minion) {
+    return Promise.settle(minions.map(function (minion) {
         // Non-sandbox way:
         // return pfn(newMinionJobRunner(minion, command), args);
 
@@ -105,17 +105,35 @@ function runFunctionOnAllMinions(fn, args) {
         sandbox.args = args;
         // return vm.runInContext('this.fn()(runner, args)', sandbox);
         // fntools.apply2s(fun, command.args), DefaultSandbox
-        return Promise.try(function () {
+        var promise = Promise.try(function () {
             return vm.runInContext(fntools.apply2s(fn, args), sandbox);
         });
+
+        promise.remoteAddress = minion.remoteAddress;
+        return promise;
     }))
-    .reflect()
-    .then(function (promiseInspection) {
-        if (promiseInspection.isFulfilled()) {
-            command.value = promiseInspection.value();     
-        } else {
-            command.error = promiseInspection.error().toString();
-        }
+    .then(function (results) {
+
+        results = results.map(function (r) {
+            var o = {};
+            debugger
+            o.remote = r.minion;
+
+            if (r.isFulfilled()) {
+                o.value = r.value();
+            } else if (r.isRejected()) {
+                o.error = r.reason();
+            }
+
+            return o;
+        });
+
+        var x = _.zip(minions.map(function (minion) {
+            return minion.remoteAddress;
+        }), results);
+
+        command.value = x;
+
         updateBrowsers(command);
         return command;
     })
