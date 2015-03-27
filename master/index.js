@@ -1,27 +1,27 @@
 #!/usr/bin/env node
 'use strict';
-const Promise = require('bluebird');
-const WebSocketServer = require('websocket').server;
-const http = require('http');
-const mime = require('mime-types')
-const commands = require('./commands');
-const express = require('express');
-const _ = require('lodash');
-const uuid = require('node-uuid');
-const vm = require('vm');
-const fntools = require('function-serialization-tools')
+var Promise = require('bluebird');
+var WebSocketServer = require('websocket').server;
+var http = require('http');
+var mime = require('mime-types')
+var commands = require('./commands');
+var express = require('express');
+var _ = require('lodash');
+var uuid = require('node-uuid');
+var vm = require('vm');
+var fntools = require('function-serialization-tools')
 
-const app = express();
+var app = express();
 app.use(express.static(__dirname + '/static'));
 
-const server = http.createServer(app).listen(7770, '0.0.0.0', function() {
+var server = http.createServer(app).listen(7770, '0.0.0.0', function() {
     console.log((new Date()) + ' Malt master is listening on port 7770');
 });
 
 // https://www.npmjs.com/package/websocket
 
 
-const wsServer = new WebSocketServer({
+var wsServer = new WebSocketServer({
     httpServer: server,
     // You should not use autoAcceptConnections for production
     // applications, as it defeats all standard cross-origin protection
@@ -35,12 +35,12 @@ function originIsAllowed(origin) {
   return true;
 }
 
-let JOB = 0;
-let COMMAND = 0;
-const JOBS = [];
+var JOB = 0;
+var COMMAND = 0;
+var JOBS = [];
 
-const minions = [];
-const browsers = [];
+var minions = [];
+var browsers = [];
 
 function updateBrowsers(command) {
     browsers.map(function (connection) {
@@ -138,7 +138,7 @@ function startRemoteJob(connection, fn, args) {
     
     JOB++;
 
-    let job = {};
+    var job = {};
     job.message = 'newjob';
     job.id = JOB;
     job.script = fn.toString();
@@ -166,7 +166,7 @@ wsServer.on('request', function(request) {
     }
 
     if (_.contains(request.requestedProtocols, 'command')) {
-        let connection = request.accept('command', request.origin);
+        var connection = request.accept('command', request.origin);
 
         var msg = 'browser connected ' + request.remoteAddresses + ' ' + request.httpRequest.headers['user-agent'];
         debugger
@@ -199,7 +199,7 @@ wsServer.on('request', function(request) {
     }
 
     if (_.contains(request.requestedProtocols, 'minion')) {
-        let connection = request.accept('minion', request.origin);
+        var connection = request.accept('minion', request.origin);
         minions.push(connection);
 
         var msg = 'minion connected ' + request.remoteAddresses;
@@ -219,7 +219,7 @@ wsServer.on('request', function(request) {
                 connection.sendUTF(JSON.stringify(msg));
             })
 
-            const job = JOBS[message.id];
+            var job = JOBS[message.id];
 
             if (message.error) {
                 job.rejecter(message.error)
@@ -239,7 +239,7 @@ wsServer.on('request', function(request) {
         });
     }
 
-    // let connection = request.accept('minion', request.origin);
+    // var connection = request.accept('minion', request.origin);
     // minions.push(connection);
     
 
