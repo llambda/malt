@@ -15,6 +15,27 @@ style.table = {
 var m = require('mithril');
 // var _ = require('lodash');
 
+var messages = {};
+messages.controller = function() {
+  this.messages = [];
+  this.get = function () {
+    return this.messages;
+  }
+  this.add = function (message) {
+    return this.messages.unshift(message);
+  }
+}
+
+messages.view = function(ctrl) {
+  function renderMsg(message) {
+    return m('li', JSON.stringify(message));
+  }
+
+  return m('ul', ctrl.get().map(function (message) {
+      return renderMsg(message);
+    }));
+};
+
 var jobs = {};
 jobs.controller = function() {
   this.jobs = [];
@@ -33,10 +54,10 @@ jobs.view = function(ctrl) {
 
   function renderJobTd(job) {
     if (!job.error) {
-      return m("td", style.good, JSON.stringify(job.value));
+      return m("td", style.good, JSON.stringify(job.value, null, 2));
     } else {
       return m("td", style.bad,
-        [JSON.stringify(job.error), m("br"), m("br"), job.errorstack]);
+        [JSON.stringify(job.error, null, 2), m("br"), m("br"), job.errorstack]);
     }
   }
 
@@ -156,7 +177,7 @@ commands.view = function(controller) {
 
 function renderCommandRow(row) {
   if (!row.error) {
-    return m("td", style.good, JSON.stringify(row.response));
+    return m("td", style.good, JSON.stringify(row.response, null, 2));
   } else {
     return m("td", style.bad,
       [JSON.stringify(row.error), m("br"), m("br"), row.errorstack]);
@@ -186,11 +207,12 @@ window.addEventListener('load', loaded);
 function loaded() {
   var cmdctrl =  m.module(document.getElementById('commands'), commands);
   var jobsctrl = m.module(document.getElementById('jobs'), jobs);
+  var msgsctrl = m.module(document.getElementById('messages'), messages);
 
-  connect(cmdctrl, jobsctrl);
+  connect(cmdctrl, jobsctrl, msgsctrl);
 }
 
-function connect(cmdctrl, jobsctrl) {
+function connect(cmdctrl, jobsctrl, msgsctrl) {
 
   var W3CWebSocket = require('websocket').w3cwebsocket;
   client = new W3CWebSocket('ws://' + location.host, 'command');
@@ -201,6 +223,8 @@ function connect(cmdctrl, jobsctrl) {
       if (typeof e.data === 'string') {
         var o = JSON.parse(e.data);
         console.dir(o);
+
+        msgsctrl.add(o);
 
         if (o.message === 'jobdone') {
           jobsctrl.add(o);

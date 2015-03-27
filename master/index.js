@@ -14,7 +14,7 @@ const fntools = require('function-serialization-tools')
 const app = express();
 app.use(express.static(__dirname + '/static'));
 
-const server = http.createServer(app).listen(7770, function() {
+const server = http.createServer(app).listen(7770, '0.0.0.0', function() {
     console.log((new Date()) + ' Malt master is listening on port 7770');
 });
 
