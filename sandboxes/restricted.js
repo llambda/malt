@@ -1,5 +1,7 @@
 'use strict';
 var Promise = module.exports.Promise = require('bluebird');
+var bunyan = require('bunyan');
+var log = bunyan.createLogger({name: 'restrictedSandbox', level: 'debug'});
 
 /**
  * Somewhat restricted sandbox, intended to run command code in masters
@@ -8,7 +10,7 @@ var Promise = module.exports.Promise = require('bluebird');
 module.exports = function() {
 
 	var o = {};
-	o.console = console;
+	o.log = log;
 	o.process = {};
 	o.process.hrtime = process.hrtime;
 	o.process.uptime = process.uptime;
