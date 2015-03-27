@@ -232,8 +232,6 @@ function connect(cmdctrl, jobsctrl, msgsctrl) {
           jobsctrl.add(o);
         } else if (o.message === 'commanddone') {
           cmdctrl.add(o);
-        } else {
-          throw new Error('unknown message ' + o.message);
         }
       }
     } finally {

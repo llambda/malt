@@ -168,6 +168,11 @@ wsServer.on('request', function(request) {
     if (_.contains(request.requestedProtocols, 'command')) {
         let connection = request.accept('command', request.origin);
 
+        var msg = 'browser connected ' + request.remoteAddresses;
+        browsers.map(function (connection) {
+            connection.sendUTF(JSON.stringify(msg));
+        })
+
         browsers.push(connection);
 
         connection.on('message', function (message) {
@@ -180,36 +185,61 @@ wsServer.on('request', function(request) {
         })
 
         connection.on('close', function (reasonCode, description) {
-          console.log((new Date()) + ' command Connection closed '+ reasonCode + ' ' + description);
-          _.remove(browsers, connection);
+            var msg = 'browser disconnected '+ connection.remoteAddresses;
+            console.log(msg);
+            _.remove(browsers, connection);
+
+            browsers.map(function (connection) {
+                connection.sendUTF(JSON.stringify(msg));
+            })
         })
 
         return;
     }
 
-    let connection = request.accept('minion', request.origin);
-    minions.push(connection);
+    if (_.contains(request.requestedProtocols, 'minion')) {
+        let connection = request.accept('minion', request.origin);
+        minions.push(connection);
+
+        var msg = 'minion connected ' + request.remoteAddresses;
+        browsers.map(function (connection) {
+            connection.sendUTF(JSON.stringify(msg));
+        })
+
+        connection.on('message', function (message) {
+
+            if (message.type !== 'utf8') {
+                console.error('Error: Received Message not utf8 type: ' + message);
+            }
+
+            message = JSON.parse(message.utf8Data);
+
+            browsers.map(function (connection) {
+                connection.sendUTF(JSON.stringify(msg));
+            })
+
+            const job = JOBS[message.id];
+
+            if (message.error) {
+                job.rejecter(message.error)
+            } else {
+                job.resolver(message.value)
+            }
+        })
+
+        connection.on('close', function(reasonCode, description) {
+            var msg = 'minion disconnected ' + connection.remoteAddress
+            console.log(msg);
+            _.remove(minions, connection);
+
+            browsers.map(function (connection) {
+                connection.sendUTF(JSON.stringify(msg));
+            })
+        });
+    }
+
+    // let connection = request.accept('minion', request.origin);
+    // minions.push(connection);
     
-    connection.on('message', function (message) {
-        console.log((new Date()) + ' minion connection accepted.');
 
-        if (message.type !== 'utf8') {
-            console.error('Error: Received Message not utf8 type: ' + message);
-        }
-
-        message = JSON.parse(message.utf8Data);
-
-        const job = JOBS[message.id];
-
-        if (message.error) {
-            job.rejecter(message.error)
-        } else {
-            job.resolver(message.value)
-        }
-    })
-
-    connection.on('close', function(reasonCode, description) {
-        console.log((new Date()) + ' Minion ' + connection.remoteAddress + ' disconnected.');
-        _.remove(minions, connection);
-    });
 });
