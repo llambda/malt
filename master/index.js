@@ -12,7 +12,7 @@ var vm = require('vm');
 var fntools = require('function-serialization-tools')
 
 var bunyan = require('bunyan');
-var log = bunyan.createLogger({name: 'minion', level: 'debug'});
+var log = bunyan.createLogger({name: 'master', level: 'debug'});
 
 var app = express();
 app.use(express.static(__dirname + '/static'));
@@ -162,9 +162,8 @@ function startRemoteJob(connection, fn, args) {
 wsServer.on('request', function(request) {
 
     if (!originIsAllowed(request.origin)) {
-      // Make sure we only accept requests from an allowed origin
       request.reject();
-      log.info('connection from origin ' + request.origin + ' rejected.');
+      log.warn('Rejected connection from origin ', request.origin);
       return;
     }
 
@@ -172,7 +171,7 @@ wsServer.on('request', function(request) {
         var connection = request.accept('command', request.origin);
 
         var msg = 'browser connected ' + request.remoteAddresses + ' ' + request.httpRequest.headers['user-agent'];
-        
+        log.info(msg);
         browsers.map(function (connection) {
             connection.sendUTF(JSON.stringify(msg));
         })
@@ -206,9 +205,11 @@ wsServer.on('request', function(request) {
         minions.push(connection);
 
         var msg = 'minion connected ' + request.remoteAddresses;
+        log.info(msg);
         browsers.map(function (connection) {
             connection.sendUTF(JSON.stringify(msg));
         })
+
 
         connection.on('message', function (message) {
 

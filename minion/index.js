@@ -55,18 +55,17 @@ client.on('connect', function(connection) {
         if (message.type === 'utf8') {
             var command = JSON.parse(message.utf8Data);
 
+            log.debug(command);
+
             if (command.message === 'newjob') {
                 var id = command.id;
                 var fun = fntools.s2f(command.script);
                 Promise.try(function () {
-                    log.debug('args: ' + command.args);
-                    log.debug(fun.toString());
                     return vm.runInContext(fntools.apply2s(fun, command.args), DefaultSandbox);
                 })
                 .reflect()
                 .then(function (promiseInspection) {
                     if (promiseInspection.isFulfilled()) {
-                        log.debug(promiseInspection)
                         sendResponse(id, promiseInspection.value());
                     } else {
                         sendResponse(id, null, promiseInspection.error().toString(), null);
