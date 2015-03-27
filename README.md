@@ -1,7 +1,5 @@
 # malt
-Malt Stack. Salt Stack like thingy in io.js.
-
-Not really ready to use yet, and the design may change as it evolves.
+Malt Stack. Salt Stack like thingy in io.js. The whole thing does work, however it is not yet a finished product and the design may change as it evolves. So for the time being you have to git clone the repository and manually run the master and minions.
 
 The purpose of this software is to control a bunch of computers from one computer. The computers you want to control are called minions, and the computer doing the controlling is called the master. You might want to do this if, for instance, you had a bunch of Linux boxes and needed to install software on them, run commands, start and stop services, etc.
 
@@ -13,7 +11,7 @@ The master also serves up a web interface, and websocket is used to send message
 
 Commands are simply io.js functions that run sandboxed on the master and the minions. The sandbox contains a remote executor function that allows running code on the minions. Commands can have arguments and run code both remotely on the minions, as well as on the master. Remote code returns promises or values that are automatically converted to promises, which can be combined with promises on the master. This allows maximum parallellism horizontally across minions, as well as vertically within the minion. Remote code runs as jobs which are shown in the web interface.
 
-Remote code Functions are convered to Strings via Function.toString(), sent as a String to the minions, then reconstitued (deserialized) at the other end back into a JavaScript Function.
+Remote code Functions are convered to Strings via Function.toString(), sent as a String to the minions, then reconstitued (deserialized) at the other end back into a JavaScript Function via [function-serialization-tools](https://www.npmjs.com/package/function-serialization-tools).
 
 For example, the ping command is designed to first get the current time on the master, then run a function remotely on the minion that returns any value (which is unused). Then, when that is done, the current time on the master is obtained again, and finally the difference is returned as the command's return value.
 
