@@ -1,5 +1,5 @@
 'use strict';
-let Promise = module.exports.Promise = require('bluebird');
+var Promise = module.exports.Promise = require('bluebird');
 
 /**
  * Somewhat restricted sandbox, intended to run command code in masters

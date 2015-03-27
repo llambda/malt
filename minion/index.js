@@ -1,25 +1,27 @@
 #!/usr/bin/env node
 'use strict';
-const Promise = require('bluebird');
-const WebSocketClient = require('websocket').client;
-const vm = require('vm');
-const fntools = require('function-serialization-tools')
-const client = new WebSocketClient();
-const DefaultSandbox = require('../sandboxes/permissive')();
+var Promise = require('bluebird');
+var WebSocketClient = require('websocket').client;
+var vm = require('vm');
+var fntools = require('function-serialization-tools')
+var client = new WebSocketClient();
+var DefaultSandbox = require('../sandboxes/permissive')();
+var bunyan = require('bunyan');
+var log = bunyan.createLogger({name: 'minion', level: 'debug'});
 
 vm.createContext(DefaultSandbox);
 
 client.on('connectFailed', function(error) {
-    console.log('Connection failed: ' + error.toString());
+    log.warn('Connection failed: ' + error.toString());
 });
 
-const QUEUED_JOBS = [];
+var QUEUED_JOBS = [];
 
 client.on('connect', function(connection) {
 
     function sendResponse(id, value, error, errorstack) {
         if (connection.connected) {
-            let send = {};
+            var send = {};
             send.message = 'jobdone';
             send.id = id;
             send.value = value;
@@ -51,11 +53,11 @@ client.on('connect', function(connection) {
     });
     connection.on('message', function(message) {
         if (message.type === 'utf8') {
-            let command = JSON.parse(message.utf8Data);
+            var command = JSON.parse(message.utf8Data);
 
             if (command.message === 'newjob') {
-                let id = command.id;
-                let fun = fntools.s2f(command.script);
+                var id = command.id;
+                var fun = fntools.s2f(command.script);
                 Promise.try(function () {
                     console.log('args: ' + command.args);
                     console.log(fun.toString());
