@@ -13,6 +13,7 @@
   "dependencies": {
     "autoinstall": "^0.3.1",
     "bluebird": "^2.9.13",
+    "commander": "^2.7.1",
     "express": "^4.12.2",
     "function-serialization-tools": "^1.0.0",
     "lodash": "^3.4.0",
