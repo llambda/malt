@@ -11,11 +11,14 @@ var uuid = require('node-uuid');
 var vm = require('vm');
 var fntools = require('function-serialization-tools')
 
+var bunyan = require('bunyan');
+var log = bunyan.createLogger({name: 'minion', level: 'debug'});
+
 var app = express();
 app.use(express.static(__dirname + '/static'));
 
 var server = http.createServer(app).listen(7770, '0.0.0.0', function() {
-    console.log((new Date()) + ' Malt master is listening on port 7770');
+    log.info('malt master listening on port 7770');
 });
 
 // https://www.npmjs.com/package/websocket
@@ -161,7 +164,7 @@ wsServer.on('request', function(request) {
     if (!originIsAllowed(request.origin)) {
       // Make sure we only accept requests from an allowed origin
       request.reject();
-      console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
+      log.info('connection from origin ' + request.origin + ' rejected.');
       return;
     }
 
@@ -169,7 +172,7 @@ wsServer.on('request', function(request) {
         var connection = request.accept('command', request.origin);
 
         var msg = 'browser connected ' + request.remoteAddresses + ' ' + request.httpRequest.headers['user-agent'];
-        debugger
+        
         browsers.map(function (connection) {
             connection.sendUTF(JSON.stringify(msg));
         })
@@ -181,13 +184,13 @@ wsServer.on('request', function(request) {
             if (o.message === 'newcommand' && o.command && commands[o.command]) {
                 runFunctionOnAllMinions(commands[o.command], o.arguments);
             } else {
-                console.error('Unknown command received');
+                log.error('Unknown command received ', o);
             }
         })
 
         connection.on('close', function (reasonCode, description) {
             var msg = 'browser disconnected '+ connection.remoteAddresses + ' ' + request.httpRequest.headers['user-agent'];
-            console.log(msg);
+            log.info(msg);
             _.remove(browsers, connection);
 
             browsers.map(function (connection) {
@@ -210,7 +213,7 @@ wsServer.on('request', function(request) {
         connection.on('message', function (message) {
 
             if (message.type !== 'utf8') {
-                console.error('Error: Received Message not utf8 type: ' + message);
+                log.error('Error: Received Message not utf8 type: ' + message);
             }
 
             message = JSON.parse(message.utf8Data);
@@ -230,7 +233,7 @@ wsServer.on('request', function(request) {
 
         connection.on('close', function(reasonCode, description) {
             var msg = 'minion disconnected ' + connection.remoteAddress
-            console.log(msg);
+            log.info(msg);
             _.remove(minions, connection);
 
             browsers.map(function (connection) {

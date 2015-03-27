@@ -43,12 +43,12 @@ client.on('connect', function(connection) {
         sendResponse(job.id, job, value, job.error);
     });
 
-    console.log('Connected to master.');
+    log.info('Connected to master.');
     connection.on('error', function(error) {
-        console.error("Connection error: " + error.toString());
+        log.error('Connection error', error);
     });
     connection.on('close', function() {
-        console.error('Connection closed');
+        log.error('Connection closed');
         connect();
     });
     connection.on('message', function(message) {
@@ -59,24 +59,24 @@ client.on('connect', function(connection) {
                 var id = command.id;
                 var fun = fntools.s2f(command.script);
                 Promise.try(function () {
-                    console.log('args: ' + command.args);
-                    console.log(fun.toString());
+                    log.debug('args: ' + command.args);
+                    log.debug(fun.toString());
                     return vm.runInContext(fntools.apply2s(fun, command.args), DefaultSandbox);
                 })
                 .reflect()
                 .then(function (promiseInspection) {
                     if (promiseInspection.isFulfilled()) {
-                        console.log(promiseInspection)
+                        log.debug(promiseInspection)
                         sendResponse(id, promiseInspection.value());
                     } else {
                         sendResponse(id, null, promiseInspection.error().toString(), null);
                     }
                 })
             } else {
-                console.error('Unknown command ' + message);
+                log.error('Unknown command', message);
             }
         } else {
-            console.error('Expected a UTF8 command ' + message);
+            log.error('Expected a UTF8 command', message);
         }
     });
 });
