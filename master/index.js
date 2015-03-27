@@ -168,7 +168,8 @@ wsServer.on('request', function(request) {
     if (_.contains(request.requestedProtocols, 'command')) {
         let connection = request.accept('command', request.origin);
 
-        var msg = 'browser connected ' + request.remoteAddresses;
+        var msg = 'browser connected ' + request.remoteAddresses + ' ' + request.httpRequest.headers['user-agent'];
+        debugger
         browsers.map(function (connection) {
             connection.sendUTF(JSON.stringify(msg));
         })
@@ -185,7 +186,7 @@ wsServer.on('request', function(request) {
         })
 
         connection.on('close', function (reasonCode, description) {
-            var msg = 'browser disconnected '+ connection.remoteAddresses;
+            var msg = 'browser disconnected '+ connection.remoteAddresses + ' ' + request.httpRequest.headers['user-agent'];
             console.log(msg);
             _.remove(browsers, connection);
 
