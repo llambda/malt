@@ -1,15 +1,28 @@
 <!doctype html>
 <html>	
 <head>
-<title>Malt</title>
-<script src="browserified.js"></script>
+	<title>Malt</title>
+	<script src="browserified.js"></script>
+	<style>
+		*: { box-sizing: border-box }
+	</style>
 </head>
 <body>
-<h1>Commands</h1>
-<div id="commands"></div>
-<h1>Jobs</h1>
-<div id="jobs"></div>
-<h1>Messages</h1>
-<div id="messages"></div>
+	<div width="100%">
+		<h1>Commands</h1>
+		<div id="commands" />
+	</div>
+
+	<div style="position:absolute;right:0;top:0;height:100%">
+		<div style="max-height:250px;overflow:scroll;">
+			<h1>Jobs</h1>
+			<div id="jobs" />
+		</div>
+	</div>
+		
+	<div style="max-height:250px;position:relative;top:50px;overflow:scroll;">
+		<h1>Messages</h1>
+		<div id="messages"/>
+	</div>	
 </body>
 </html>

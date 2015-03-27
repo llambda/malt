@@ -22,7 +22,8 @@ messages.controller = function() {
     return this.messages;
   }
   this.add = function (message) {
-    return this.messages.unshift(message);
+    this.messages.unshift(message);
+    this.messages.length = 2000; // keep only last 2000 messages
   }
 }
 
@@ -46,6 +47,7 @@ jobs.controller = function() {
 
   this.add = function (job) {
     this.jobs.unshift(job);
+    this.jobs.length = 2000;
   }
 }
 
