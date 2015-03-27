@@ -81,7 +81,7 @@ client.on('connect', function(connection) {
 });
 
 function connect() {
-    client.connect('ws://localhost:7770/', 'minion');
+    client.connect('ws://malt:7770/', 'minion');
 }
 
 client.on('connectFailed', function () {
