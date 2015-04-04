@@ -19,3 +19,30 @@ Code is sandboxed on the master and minions to prevent it from affecting interna
 
 The default sandbox Promisifies most of io.js API via Bluebird, as well as providing autorequire. This likely will need to be improved to provide full package.json npm support in commands.
 
+# Installation and usage
+
+1. Clone the source code:
+
+  ```git clone https://github.com/llambda/malt.git```
+  
+2. change directories into the cloned repo
+
+  ```cd malt```
+  
+3. Run the malt master:
+
+  ```
+  ./mastercli.js
+  ```
+  
+4. Run the minion:
+
+  ```
+  ./minioncli.js
+  ```
+  
+5. Open Chrome or Safari to [http://localhost:3417]
+  (Firefox is currently broken)
+
+
+
