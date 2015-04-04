@@ -48,7 +48,7 @@ The default sandbox Promisifies most of io.js API via Bluebird, as well as provi
   ./minioncli.js
   ```
 
-  Running with the ```--help``` argument shows usage. You can run minions on other machines and use the ```-h``` to tell them which machine to connect to. By default, they will connect to the host named 'malt'.
+  Running with the ```--help``` argument shows usage. You can run minions on other machines and use the ```-H``` or ```--host``` to tell them which machine to connect to. By default, they will connect to the host named 'malt'.
   
 6. Open Chrome or Safari to [http://localhost:3417]
   (Firefox is currently broken)
