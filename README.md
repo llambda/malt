@@ -2,7 +2,7 @@
 
 ## Overview
 
-Malt Stack. Salt Stack like thingy in [https://nodejs.org](node.js) or [https://iojs.org/en/index.html](io.js). The whole thing does work, however it is not yet a finished product and the design may change as it evolves. So for the time being you have to git clone the repository and manually run the master and minions.
+Malt Stack. Salt Stack like thingy in [https://nodejs.org](node.js) or [https://iojs.org](io.js). The whole thing does work, however it is not yet a finished product and the design may change as it evolves. So for the time being you have to git clone the repository and manually run the master and minions.
 
 The purpose of this software is to control a bunch of computers from one computer. The computers you want to control are called minions, and the computer doing the controlling is called the master. You might want to do this if, for instance, you had a bunch of Linux boxes and needed to install software on them, run commands, start and stop services, etc.
 
