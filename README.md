@@ -52,7 +52,7 @@ Requires Node.js v0.12 or later, or iojs.
 
   Running with the ```--help``` argument shows usage. You can run minions on other machines and use the ```-H``` or ```--host``` to tell them which machine to connect to. By default, they will connect to the host named 'malt'.
   
-6. Open Chrome or Safari to [http://localhost:3417] Firefox is currently broken.
+6. Open Chrome or Safari to [http://localhost:3417](http://localhost:3417) Firefox is currently broken.
 
 7. Run a test ping. With 'ping' as the command, click the 'run' button. You should see a response time from each minion.
 
