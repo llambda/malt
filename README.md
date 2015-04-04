@@ -2,7 +2,7 @@
 
 ## Overview
 
-Malt Stack. Salt Stack like thingy in node.js or io.js. The whole thing does work, however it is not yet a finished product and the design may change as it evolves. So for the time being you have to git clone the repository and manually run the master and minions.
+Malt Stack. Salt Stack like thingy in [https://nodejs.org](node.js) or [https://iojs.org/en/index.html](io.js). The whole thing does work, however it is not yet a finished product and the design may change as it evolves. So for the time being you have to git clone the repository and manually run the master and minions.
 
 The purpose of this software is to control a bunch of computers from one computer. The computers you want to control are called minions, and the computer doing the controlling is called the master. You might want to do this if, for instance, you had a bunch of Linux boxes and needed to install software on them, run commands, start and stop services, etc.
 
@@ -12,7 +12,7 @@ Similar in design to salt stack, the master listens on a TCP port, and the minio
 
 Websocket is used to send messages between master and minions, and between master and web browser clients. This allows TLS and other security to be layered in if desired.
 
-The master also serves up a web interface, and websocket is used to send messages between the master and web clients. The web interface uses Mithril.js, a high performance MVC library.
+The master also serves up a web interface, and websocket is used to send messages between the master and web clients. The web interface uses [http://lhorie.github.io/mithril/](Mithril.js), a high performance MVC library.
 
 Commands are simply io.js functions that run sandboxed on the master and the minions. The sandbox contains a remote executor function that allows running code on the minions. Commands can have arguments and run code both remotely on the minions, as well as on the master. Remote code returns promises or values that are automatically converted to promises, which can be combined with promises on the master. This allows maximum parallellism horizontally across minions, as well as vertically within the minion. Remote code runs as jobs which are shown in the web interface.
 
