@@ -26,6 +26,8 @@ The default sandbox Promisifies most of io.js API via Bluebird, as well as provi
 
 ## Installation and usage
 
+Requires Node.js v0.12 or later, or iojs.
+
 1. Add ```127.0.0.1 malt``` to your ```/etc/hosts``` file.
 
 2. Clone the source code:
