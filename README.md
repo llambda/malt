@@ -1,7 +1,12 @@
 # malt
-Malt Stack. Salt Stack like thingy in io.js. The whole thing does work, however it is not yet a finished product and the design may change as it evolves. So for the time being you have to git clone the repository and manually run the master and minions.
+
+## Overview
+
+Malt Stack. Salt Stack like thingy in node.js or io.js. The whole thing does work, however it is not yet a finished product and the design may change as it evolves. So for the time being you have to git clone the repository and manually run the master and minions.
 
 The purpose of this software is to control a bunch of computers from one computer. The computers you want to control are called minions, and the computer doing the controlling is called the master. You might want to do this if, for instance, you had a bunch of Linux boxes and needed to install software on them, run commands, start and stop services, etc.
+
+## Technical Design
 
 Similar in design to salt stack, the master listens on a TCP port, and the minions connect to the master. (This means the minions don't need to listen on a TCP port, which is good for security.)
 
@@ -19,30 +24,36 @@ Code is sandboxed on the master and minions to prevent it from affecting interna
 
 The default sandbox Promisifies most of io.js API via Bluebird, as well as providing autorequire. This likely will need to be improved to provide full package.json npm support in commands.
 
-# Installation and usage
+## Installation and usage
 
-1. Clone the source code:
+1. Add ```127.0.0.1 malt``` to your ```/etc/hosts``` file.
+
+2. Clone the source code:
 
   ```git clone https://github.com/llambda/malt.git```
   
-2. change directories into the cloned repo
+3. change directories into the cloned repo
 
   ```cd malt```
   
-3. Run the malt master:
+4. Run the malt master:
 
   ```
   ./mastercli.js
   ```
   
-4. Run the minion:
+5. Run the malt minion:
 
   ```
   ./minioncli.js
   ```
+
+  Running with the ```--help``` argument shows usage. You can run minions on other machines and use the ```-h``` to tell them which machine to connect to. By default, they will connect to the host named 'malt'.
   
-5. Open Chrome or Safari to [http://localhost:3417]
+6. Open Chrome or Safari to [http://localhost:3417]
   (Firefox is currently broken)
+
+7. Run a test ping. With 'ping' as the command, click the 'run' button. You should see a response time from each minion.
 
 
 
