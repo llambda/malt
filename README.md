@@ -2,7 +2,19 @@
 
 ## Overview
 
-Malt Stack. Salt Stack like thingy in [https://nodejs.org](node.js) or [https://iojs.org](io.js). The whole thing does work, however it is not yet a finished product and the design may change as it evolves. So for the time being you have to git clone the repository and manually run the master and minions.
+Malt Stack. Salt Stack like thingy in [https://nodejs.org](node.js). The whole thing does work, however it is not yet a finished product and the design may change as it evolves. So for the time being you have to git clone the repository and manually run the master and minions.
+
+You *can* run the master and minion on the same machine to see how it works:
+   
+     git clone https://github.com/llambda/malt.git
+    
+     npm run build
+
+     ./mastercli.sh
+   
+     ./minioncli.sh -H localhost
+   
+     open browser to http://localhost:3417
 
 The purpose of this software is to control a bunch of computers from one computer. The computers you want to control are called minions, and the computer doing the controlling is called the master. You might want to do this if, for instance, you had a bunch of Linux boxes and needed to install software on them, run commands, start and stop services, etc.
 
@@ -12,9 +24,9 @@ Similar in design to salt stack, the master listens on a TCP port, and the minio
 
 Websocket is used to send messages between master and minions, and between master and web browser clients. This allows TLS and other security to be layered in if desired.
 
-The master also serves up a web interface, and websocket is used to send messages between the master and web clients. The web interface uses [http://lhorie.github.io/mithril/](Mithril.js), a high performance MVC library.
+The master also serves up a web interface, and websocket is used to send messages between the master and web clients. 
 
-Commands are simply io.js functions that run sandboxed on the master and the minions. The sandbox contains a remote executor function that allows running code on the minions. Commands can have arguments and run code both remotely on the minions, as well as on the master. Remote code returns promises or values that are automatically converted to promises, which can be combined with promises on the master. This allows maximum parallellism horizontally across minions, as well as vertically within the minion. Remote code runs as jobs which are shown in the web interface.
+Commands are simply io.js functions that run sandboxed on the master and the minions. The sandbox contains a remote executor function that allows running code on the minions. Commands can have arguments and run code both remotely on the minions, as well as on the master. Remote code returns promises or values that are automatically converted to promises, which can be combined with promises on the master. This allows maximum concurrency horizontally across minions, as well as vertically within the minion. Remote code runs as jobs which are shown in the web interface.
 
 Remote code Functions are convered to Strings via Function.toString(), sent as a String to the minions, then reconstitued (deserialized) at the other end back into a JavaScript Function via [function-serialization-tools](https://www.npmjs.com/package/function-serialization-tools).
 
@@ -23,6 +35,10 @@ For example, the ping command is designed to first get the current time on the m
 Code is sandboxed on the master and minions to prevent it from affecting internal application state. The same is true on the minion; however, the sandbox is primarily to prevent command code from affecting internal application state. Since the purpose of the software is to allow full contorl, the default sandbox on minions is very permissive. 
 
 The default sandbox Promisifies most of io.js API via Bluebird, as well as providing autorequire. This likely will need to be improved to provide full package.json npm support in commands.
+
+## Available commands
+
+See [https://github.com/llambda/malt/blob/master/lib/commands.js](https://github.com/llambda/malt/blob/master/lib/commands.js)
 
 ## Installation and usage
 
