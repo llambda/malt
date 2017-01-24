@@ -26,7 +26,7 @@ Websocket is used to send messages between master and minions, and between maste
 
 The master also serves up a web interface, and websocket is used to send messages between the master and web clients. 
 
-Commands are simply io.js functions that run sandboxed on the master and the minions. The sandbox contains a remote executor function that allows running code on the minions. Commands can have arguments and run code both remotely on the minions, as well as on the master. Remote code returns promises or values that are automatically converted to promises, which can be combined with promises on the master. This allows maximum concurrency horizontally across minions, as well as vertically within the minion. Remote code runs as jobs which are shown in the web interface.
+Commands are simply Node.js functions that run sandboxed on the master and the minions. The sandbox contains a remote executor function that allows running code on the minions. Commands can have arguments and run code both remotely on the minions, as well as on the master. Remote code returns promises or values that are automatically converted to promises, which can be combined with promises on the master. This allows maximum concurrency horizontally across minions, as well as vertically within the minion. Remote code runs as jobs which are shown in the web interface.
 
 Remote code Functions are convered to Strings via Function.toString(), sent as a String to the minions, then reconstitued (deserialized) at the other end back into a JavaScript Function via [function-serialization-tools](https://www.npmjs.com/package/function-serialization-tools).
 
@@ -34,7 +34,7 @@ For example, the ping command is designed to first get the current time on the m
 
 Code is sandboxed on the master and minions to prevent it from affecting internal application state. The same is true on the minion; however, the sandbox is primarily to prevent command code from affecting internal application state. Since the purpose of the software is to allow full contorl, the default sandbox on minions is very permissive. 
 
-The default sandbox Promisifies most of io.js API via Bluebird, as well as providing autorequire. This likely will need to be improved to provide full package.json npm support in commands.
+The default sandbox Promisifies most of Node.js API via Bluebird, as well as providing autorequire. This likely will need to be improved to provide full package.json npm support in commands.
 
 ## Available commands
 
@@ -42,7 +42,7 @@ See [https://github.com/llambda/malt/blob/master/lib/commands.js](https://github
 
 ## Installation and usage
 
-Requires Node.js v0.12 or later, or iojs.
+Requires Node.js v0.12 or later.
 
 1. Add ```127.0.0.1 malt``` to your ```/etc/hosts``` file.
 
