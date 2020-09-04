@@ -19,7 +19,7 @@
     "function-serialization-tools": "^1.0.0",
     "lodash": "^3.4.0",
     "mime-types": "^2.0.9",
-    "mithril": "^0.1.33",
+    "mithril": "^2.0.4",
     "node-uuid": "^1.4.3",
     "npm": "^6.13.4",
     "request": "^2.54.0",
